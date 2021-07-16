@@ -3,6 +3,7 @@
 #include "Prerequisites.h"
 #include "SwapChain.h"
 #include "DeviceContext.h"
+#include "VertexBuffer.h"
 
 class RenderSystem
 {
@@ -15,7 +16,15 @@ public:
 
 public:
 	SwapChainPtr createSwapChain(HWND hwnd, UINT width, UINT height);
+    VertexBufferPtr createVertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list,
+        void* shader_byte_code, UINT size_byte_shader);
     DeviceContextPtr getImmediateDeviceContext();
+
+    // Method used to compile a shader file (.hlsl file)
+    bool compileShaderFromFile(const wchar_t* file_name, const char* entry_point_name, LPCSTR target,
+        void** shader_byte_code, size_t* byte_code_size);
+    void releaseCompiledShader();
+    void setRasterizerState(bool cull_front);
 
 private:
     void initRasterizerState();
@@ -50,6 +59,7 @@ private:
 
 private:
 	friend class SwapChain;
+    friend class VertexBuffer;
 
 };
 

@@ -62,7 +62,6 @@ RenderSystem::~RenderSystem()
 	mDxgiDevice->Release();
 	mDxgiAdapter->Release();
 	mDxgiFactory->Release();
-
 	mD3DDevice->Release();
 }
 
@@ -78,9 +77,53 @@ SwapChainPtr RenderSystem::createSwapChain(HWND hwnd, UINT width, UINT height)
     return sc;
 }
 
+VertexBufferPtr RenderSystem::createVertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list, void* shader_byte_code, UINT size_byte_shader)
+{
+    VertexBufferPtr vb = nullptr;
+
+    try {
+        vb = std::make_shared<VertexBuffer>(list_vertices, size_vertex, size_list, shader_byte_code, size_byte_shader, this);
+    }
+    catch (...) {}
+
+    return vb;
+}
+
 DeviceContextPtr RenderSystem::getImmediateDeviceContext()
 {
     return this->mImmDeviceContext;
+}
+
+bool RenderSystem::compileShaderFromFile(const wchar_t* file_name, const char* entry_point_name, LPCSTR target, 
+    void** shader_byte_code, size_t* byte_code_size)
+{
+    ID3DBlob* error_blob = nullptr;
+    if (!SUCCEEDED(::D3DCompileFromFile(file_name, nullptr, nullptr, entry_point_name, target, 0, 0, &mBlob, &error_blob))) {
+        if (error_blob) error_blob->Release();
+        return false;
+    }
+
+    *shader_byte_code = mBlob->GetBufferPointer();
+    *byte_code_size = mBlob->GetBufferSize();
+
+    return true;
+}
+
+void RenderSystem::releaseCompiledShader()
+{
+    if (mBlob) mBlob->Release();
+}
+
+void RenderSystem::setRasterizerState(bool cull_front)
+{
+    /*
+     * Rasterization (or rasterisation) is the task of taking an image described in a vector graphics format (shapes)
+     * and converting it into a raster image (a series of pixels, dots or lines, which, when displayed together,
+     * create the image which was represented via shapes). Method used to indicate the cull mode for the rasterizer
+     */
+
+    if (cull_front) mImmContext->RSSetState(mCullFrontState);
+    else mImmContext->RSSetState(mCullBackState);
 }
 
 void RenderSystem::initRasterizerState()

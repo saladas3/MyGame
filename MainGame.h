@@ -4,6 +4,7 @@
 #include "SwapChain.h"
 #include "InputListener.h"
 #include "GraphicsEngine.h"
+#include "Vectors.h"
 
 class MainGame : public Window, public InputListener
 {

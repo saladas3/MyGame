@@ -2,6 +2,7 @@
 
 #include "Prerequisites.h"
 #include "RenderSystem.h"
+#include "VertexBuffer.h"
 
 /*
  * A device context is similar to a device, but it is responsible for managing the GPU
@@ -21,6 +22,8 @@ public:
 	void drawTriangleList(UINT vertex_count, UINT start_vertex_index);
 	void drawIndexedTriangleList(UINT index_count, UINT start_vertex_index, UINT start_index_location);
 	void drawTriangleStrip(UINT vertex_count, UINT start_vertex_index);
+	void setVertexBuffer(const VertexBufferPtr& vertex_buffer);
+	void setViewportSize(UINT width, UINT height);
 
 private:
 	ID3D11DeviceContext* mDeviceContext = nullptr;

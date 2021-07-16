@@ -36,3 +36,21 @@ void DeviceContext::drawTriangleStrip(UINT vertex_count, UINT start_vertex_index
 	mDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	mDeviceContext->Draw(vertex_count, start_vertex_index);
 }
+
+void DeviceContext::setVertexBuffer(const VertexBufferPtr& vertex_buffer)
+{
+	UINT stride = vertex_buffer->mSizeVertex;
+	UINT offset = 0;
+	mDeviceContext->IASetVertexBuffers(0, 1, &vertex_buffer->mBuffer, &stride, &offset);
+	mDeviceContext->IASetInputLayout(vertex_buffer->mLayout);
+}
+
+void DeviceContext::setViewportSize(UINT width, UINT height)
+{
+	D3D11_VIEWPORT vp = {};
+	vp.Width = (FLOAT)width;
+	vp.Height = (FLOAT)height;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	mDeviceContext->RSSetViewports(1, &vp);
+}

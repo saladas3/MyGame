@@ -4,6 +4,11 @@ MainGame::MainGame() = default;
 
 MainGame::~MainGame() = default;
 
+// Temp - used for testing; DELETE AFTER
+struct vertex {
+	Vec3 position;
+};
+
 void MainGame::onCreate()
 {
 	Window::onCreate();
@@ -12,6 +17,16 @@ void MainGame::onCreate()
 
 	// Clear the whole window and show a solid color
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->mSwapChain, 0, 0.3f, 0.4f, 1);
+
+	vertex list[] = {
+		{ Vec3(-.5f, -.5f, .0f) },
+		{ Vec3(.0f, .5f, .0f) },
+		{ Vec3(.5f, -.5f, .0f) },
+	};
+
+	//void* shader_byte_code = nullptr;
+	//size_t size_shader = 0;
+	//GraphicsEngine::get()->getRenderSystem()->compileShaderFromFile(L"shader.fx", "vsmain", "vs_5_0", &shader_byte_code, &size_shader);
 
 }
 
