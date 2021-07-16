@@ -10,6 +10,15 @@
     <Filter Include="GameEngine\WindowingSystem">
       <UniqueIdentifier>{db086d02-3b28-41b7-a80d-38f6275a8187}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameClient\MainGame">
+      <UniqueIdentifier>{c2eed3b7-8a2d-4f90-948d-554d99bf2ea2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameEngine\InputSystem">
+      <UniqueIdentifier>{e2511079-3885-40bf-aff1-0055bd75759f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameEngine\Math">
+      <UniqueIdentifier>{1034994f-a6a9-452e-bd80-d07b70b8854b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -18,10 +27,22 @@
     <ClCompile Include="Window.cpp">
       <Filter>GameEngine\WindowingSystem</Filter>
     </ClCompile>
+    <ClCompile Include="MainGame.cpp">
+      <Filter>GameClient\MainGame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
       <Filter>GameEngine\WindowingSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="MainGame.h">
+      <Filter>GameClient\MainGame</Filter>
+    </ClInclude>
+    <ClInclude Include="InputListener.h">
+      <Filter>GameEngine\InputSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>GameEngine\Math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

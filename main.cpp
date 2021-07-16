@@ -1,6 +1,8 @@
 #include <iostream>
+#include "MainGame.h"
 
 int main() {
-	std::cout << "Hello world";
+	MainGame game;
+	while (game.isRunning());
 	return 0;
 }
