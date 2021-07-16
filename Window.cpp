@@ -105,12 +105,12 @@ bool Window::broadcast()
 		this->mIsInit = true;
 	}
 
+	this->onUpdate();
+
 	if (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) > 0) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-
-	this->onUpdate();
 
 	Sleep(1);
 
