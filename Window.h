@@ -12,7 +12,7 @@ public:
 	~Window();
 
 private:
-	// Peeks and dispatches messages to the WndProc method created
+	// Peeks and dispatches messages to the WndProc method
 	bool broadcast();
 
 public:

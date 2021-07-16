@@ -7,11 +7,20 @@ MainGame::~MainGame() = default;
 void MainGame::onCreate()
 {
 	Window::onCreate();
+	RECT rc = this->getClientWindowRect();
+	mSwapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->mHwnd, rc.right - rc.left, rc.bottom - rc.top);
+
+	// Clear the whole window and show a solid color
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->mSwapChain, 0, 0.3f, 0.4f, 1);
+
 }
 
 void MainGame::onUpdate()
 {
 	Window::onUpdate();
+
+	// Start swapping between the back and front buffer and present the rendered images on screen
+	this->mSwapChain->present(false);
 }
 
 void MainGame::onDestroy()

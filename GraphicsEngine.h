@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Prerequisites.h"
+#include "RenderSystem.h"
 
 class GraphicsEngine
 {
@@ -18,6 +19,8 @@ public:
 public:
 	// The get method that gives the only instance of GraphicsEngine
 	static GraphicsEngine* get();
+	static void create();
+	static void release();
 
 private:
 	RenderSystem* mRenderSystem = nullptr;

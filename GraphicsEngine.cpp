@@ -5,10 +5,17 @@ GraphicsEngine* GraphicsEngine::mEngine = nullptr;
 
 GraphicsEngine::GraphicsEngine()
 {
+	try
+	{
+		mRenderSystem = new RenderSystem();
+	}
+	catch (...) { throw std::exception("RenderSystem not created successfully"); }
 }
 
 GraphicsEngine::~GraphicsEngine()
 {
+	GraphicsEngine::mEngine = nullptr;
+	delete mRenderSystem;
 }
 
 RenderSystem* GraphicsEngine::getRenderSystem()
@@ -19,4 +26,16 @@ RenderSystem* GraphicsEngine::getRenderSystem()
 GraphicsEngine* GraphicsEngine::get()
 {
 	return mEngine;
+}
+
+void GraphicsEngine::create()
+{
+	if (GraphicsEngine::mEngine) throw std::exception("Graphics Engine already created");
+	GraphicsEngine::mEngine = new GraphicsEngine();
+}
+
+void GraphicsEngine::release()
+{
+	if (!GraphicsEngine::mEngine) return;
+	delete GraphicsEngine::mEngine;
 }

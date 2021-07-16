@@ -78,6 +78,11 @@ SwapChainPtr RenderSystem::createSwapChain(HWND hwnd, UINT width, UINT height)
     return sc;
 }
 
+DeviceContextPtr RenderSystem::getImmediateDeviceContext()
+{
+    return this->mImmDeviceContext;
+}
+
 void RenderSystem::initRasterizerState()
 {
     D3D11_RASTERIZER_DESC desc = {};
