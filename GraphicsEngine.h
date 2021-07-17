@@ -26,6 +26,10 @@ private:
 	RenderSystem* mRenderSystem = nullptr;
 
 private:
+	unsigned char mMeshLayoutByteCode[1024];
+	size_t mMeshLayoutSize = 0;
+
+private:
 	static GraphicsEngine* mEngine;
 
 };

@@ -12,30 +12,54 @@ struct vertex {
 void MainGame::onCreate()
 {
 	Window::onCreate();
+
+	// Create the swap chain
 	RECT rc = this->getClientWindowRect();
 	mSwapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->mHwnd, rc.right - rc.left, rc.bottom - rc.top);
 
 	// Clear the whole window and show a solid color
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->mSwapChain, 0, 0.3f, 0.4f, 1);
 
+	// ------------------------------------------------------
+	// Temp - used for testing; DELETE AFTER
+	// ------------------------------------------------------
 	vertex list[] = {
 		{ Vec3(-.5f, -.5f, .0f) },
 		{ Vec3(.0f, .5f, .0f) },
 		{ Vec3(.5f, -.5f, .0f) },
 	};
 
-	//void* shader_byte_code = nullptr;
-	//size_t size_shader = 0;
-	//GraphicsEngine::get()->getRenderSystem()->compileShaderFromFile(L"shader.fx", "vsmain", "vs_5_0", &shader_byte_code, &size_shader);
+	void* shader_byte_code = nullptr;
+	size_t size_shader = 0;
 
+	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"shader.fx", "vsmain", &shader_byte_code, &size_shader);
+	mTempVertexShader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(&shader_byte_code, size_shader);
+	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
+
+	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"shader.fx", "psmain", &shader_byte_code, &size_shader);
+	mTempPixelShader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(&shader_byte_code, size_shader);
+	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
+
+	mTempVertexBuffer = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(list, sizeof(vertex), ARRAYSIZE(list), shader_byte_code, size_shader);
+	// ------------------------------------------------------
 }
 
 void MainGame::onUpdate()
 {
 	Window::onUpdate();
 
+	// Set viewport of render target in which we have to draw (the whole screen)
+	RECT rc = this->getClientWindowRect();
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(rc.right - rc.left, rc.bottom - rc.top);
+	
+	// Temp - used for testing; DELETE AFTER
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(mTempVertexShader);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(mTempPixelShader);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mTempVertexBuffer);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawTriangleList(mTempVertexBuffer->getSizeVertexList(), 0);
+
 	// Start swapping between the back and front buffer and present the rendered images on screen
-	this->mSwapChain->present(false);
+	this->mSwapChain->present(true);
 }
 
 void MainGame::onDestroy()

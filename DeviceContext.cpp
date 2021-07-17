@@ -45,6 +45,16 @@ void DeviceContext::setVertexBuffer(const VertexBufferPtr& vertex_buffer)
 	mDeviceContext->IASetInputLayout(vertex_buffer->mLayout);
 }
 
+void DeviceContext::setVertexShader(const VertexShaderPtr& vertex_shader)
+{
+	mDeviceContext->VSSetShader(vertex_shader->mVs, nullptr, 0);
+}
+
+void DeviceContext::setPixelShader(const PixelShaderPtr& pixel_shader)
+{
+	mDeviceContext->PSSetShader(pixel_shader->mPs, nullptr, 0);
+}
+
 void DeviceContext::setViewportSize(UINT width, UINT height)
 {
 	D3D11_VIEWPORT vp = {};

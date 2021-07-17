@@ -130,5 +130,8 @@
     <FxCompile Include="DirectionalLightPS.hlsl">
       <Filter>GameClient\GlobalShaders</Filter>
     </FxCompile>
+    <FxCompile Include="VertexMeshLayoutShader.hlsl">
+      <Filter>GameClient\GlobalShaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

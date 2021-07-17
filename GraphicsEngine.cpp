@@ -9,7 +9,15 @@ GraphicsEngine::GraphicsEngine()
 	{
 		mRenderSystem = new RenderSystem();
 	}
-	catch (...) { throw std::exception("RenderSystem not created successfully"); }
+	catch (...) { throw std::exception("RenderSystem could not be created."); }
+
+	void* shader_byte_code = nullptr;
+	size_t size_shader = 0;
+
+	mRenderSystem->compileVertexShader(L"VertexMeshLayoutShader.hlsl", "vsmain", &shader_byte_code, &size_shader);
+	::memcpy(mMeshLayoutByteCode, shader_byte_code, size_shader);
+	mMeshLayoutSize = size_shader;
+	mRenderSystem->releaseCompiledShader();
 }
 
 GraphicsEngine::~GraphicsEngine()

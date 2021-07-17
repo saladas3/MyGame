@@ -26,7 +26,13 @@ RenderSystem::RenderSystem()
 
     D3D_FEATURE_LEVEL feature_levels[] =
     {
-            D3D_FEATURE_LEVEL_11_0
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_1,
+        D3D_FEATURE_LEVEL_10_0,
+        D3D_FEATURE_LEVEL_9_3,
+        D3D_FEATURE_LEVEL_9_2,
+        D3D_FEATURE_LEVEL_9_1
     };
 
     /*
@@ -37,10 +43,10 @@ RenderSystem::RenderSystem()
      * (with some exceptions; for example, new 11 features will not run on an existing 9 card)
      */
 
-    HRESULT res = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, NULL, feature_levels, ARRAYSIZE(feature_levels),
-        D3D11_SDK_VERSION, &mD3DDevice, &mFeatureLevel, &mImmContext);
+    HRESULT res = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, feature_levels, 
+        ARRAYSIZE(feature_levels), D3D11_SDK_VERSION, &mD3DDevice, &mFeatureLevel, &mImmContext);
 
-    if (FAILED(res)) throw std::exception("RenderSystem creation error.");
+    if (FAILED(res)) throw std::exception("RenderSystem creation error. Could not create the D3D Device.");
 
     mImmDeviceContext = std::make_shared<DeviceContext>(mImmContext, this);
 
@@ -53,12 +59,6 @@ RenderSystem::RenderSystem()
 
 RenderSystem::~RenderSystem()
 {
-	if (mVs) mVs->Release();
-	if (mPs) mPs->Release();
-
-	if (mVsBlob) mVsBlob->Release();
-	if (mPsBlob) mPsBlob->Release();
-
 	mDxgiDevice->Release();
 	mDxgiAdapter->Release();
 	mDxgiFactory->Release();
@@ -67,26 +67,22 @@ RenderSystem::~RenderSystem()
 
 SwapChainPtr RenderSystem::createSwapChain(HWND hwnd, UINT width, UINT height)
 {
-    SwapChainPtr sc = nullptr;
-
-    try {
-        sc = std::make_shared<SwapChain>(hwnd, width, height, this);
-    }
-    catch (...) {}
-
-    return sc;
+    return std::make_shared<SwapChain>(hwnd, width, height, this);
 }
 
 VertexBufferPtr RenderSystem::createVertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list, void* shader_byte_code, UINT size_byte_shader)
 {
-    VertexBufferPtr vb = nullptr;
+    return std::make_shared<VertexBuffer>(list_vertices, size_vertex, size_list, shader_byte_code, size_byte_shader, this);
+}
 
-    try {
-        vb = std::make_shared<VertexBuffer>(list_vertices, size_vertex, size_list, shader_byte_code, size_byte_shader, this);
-    }
-    catch (...) {}
+VertexShaderPtr RenderSystem::createVertexShader(const void* shader_byte_code, size_t byte_code_size)
+{
+    return std::make_shared<VertexShader>(shader_byte_code, byte_code_size, this);
+}
 
-    return vb;
+PixelShaderPtr RenderSystem::createPixelShader(const void* shader_byte_code, size_t byte_code_size)
+{
+    return std::make_shared<PixelShader>(shader_byte_code, byte_code_size, this);
 }
 
 DeviceContextPtr RenderSystem::getImmediateDeviceContext()
@@ -94,17 +90,30 @@ DeviceContextPtr RenderSystem::getImmediateDeviceContext()
     return this->mImmDeviceContext;
 }
 
-bool RenderSystem::compileShaderFromFile(const wchar_t* file_name, const char* entry_point_name, LPCSTR target, 
-    void** shader_byte_code, size_t* byte_code_size)
+bool RenderSystem::compileVertexShader(const wchar_t* file_name, const char* entry_point_name, void** shader_byte_code, size_t* byte_code_size)
 {
     ID3DBlob* error_blob = nullptr;
-    if (!SUCCEEDED(::D3DCompileFromFile(file_name, nullptr, nullptr, entry_point_name, target, 0, 0, &mBlob, &error_blob))) {
+    if (!SUCCEEDED(::D3DCompileFromFile(file_name, nullptr, nullptr, entry_point_name, "vs_4_0", 0, 0, &mBlob, &error_blob))) {
+        if (error_blob) error_blob->Release();
+        return false;
+    }
+
+    *shader_byte_code = this->mBlob->GetBufferPointer();
+    *byte_code_size = this->mBlob->GetBufferSize();
+
+    return true;
+}
+
+bool RenderSystem::compilePixelShader(const wchar_t* file_name, const char* entry_point_name, void** shader_byte_code, size_t* byte_code_size)
+{
+    ID3DBlob* error_blob = nullptr;
+    if (!SUCCEEDED(::D3DCompileFromFile(file_name, nullptr, nullptr, entry_point_name, "ps_4_0", 0, 0, &mBlob, &error_blob))) {
         if (error_blob) error_blob->Release();
         return false;
     }
 
     *shader_byte_code = mBlob->GetBufferPointer();
-    *byte_code_size = mBlob->GetBufferSize();
+    *byte_code_size = (UINT)mBlob->GetBufferSize();
 
     return true;
 }

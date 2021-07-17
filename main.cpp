@@ -1,5 +1,6 @@
 #include "MainGame.h"
 #include "GraphicsEngine.h"
+#include <iostream>
 
 int main() {
 	try
@@ -15,7 +16,8 @@ int main() {
 			MainGame app;
 			while (app.isRunning());
 		}
-		catch (...) {
+		catch (const std::exception& ex) {
+			std::cerr << "ERROR: " << ex.what() << std::endl;
 			//InputSystem::release();
 			GraphicsEngine::release();
 			return -1;

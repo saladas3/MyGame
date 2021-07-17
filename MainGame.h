@@ -6,6 +6,9 @@
 #include "GraphicsEngine.h"
 #include "Vectors.h"
 
+// Temp - used for testing; DELETE AFTER
+#include "VertexBuffer.h"
+
 class MainGame : public Window, public InputListener
 {
 
@@ -30,6 +33,11 @@ public:
     virtual void onLeftMouseUp(const Point& mouse_pos) override;
     virtual void onRightMouseDown(const Point& mouse_pos) override;
     virtual void onRightMouseUp(const Point& mouse_pos) override;
+
+    // Temp - used for testing; DELETE AFTER
+    VertexBufferPtr mTempVertexBuffer = nullptr;
+    VertexShaderPtr mTempVertexShader = nullptr;
+    PixelShaderPtr mTempPixelShader = nullptr;
 
 private:
     SwapChainPtr mSwapChain = nullptr;
