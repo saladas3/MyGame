@@ -43,7 +43,7 @@ RenderSystem::RenderSystem()
      * (with some exceptions; for example, new 11 features will not run on an existing 9 card)
      */
 
-    HRESULT res = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, feature_levels, 
+    HRESULT res = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, NULL, feature_levels,
         ARRAYSIZE(feature_levels), D3D11_SDK_VERSION, &mD3DDevice, &mFeatureLevel, &mImmContext);
 
     if (FAILED(res)) throw std::exception("RenderSystem creation error. Could not create the D3D Device.");

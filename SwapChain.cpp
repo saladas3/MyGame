@@ -16,7 +16,7 @@ SwapChain::SwapChain(HWND hWnd, UINT width, UINT height, RenderSystem* renderSys
     desc.BufferDesc.RefreshRate.Denominator = 1;
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;     // how swap chain is to be used
     desc.OutputWindow = hWnd;                               // the window to be used
-    desc.SampleDesc.Count = 4;                              // nr. of multisamples (for anti-aliasing)
+    desc.SampleDesc.Count = 1;                              // nr. of multisamples (for anti-aliasing)
     desc.SampleDesc.Quality = 0;
     desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
     /*
@@ -39,7 +39,6 @@ SwapChain::SwapChain(HWND hWnd, UINT width, UINT height, RenderSystem* renderSys
 SwapChain::~SwapChain()
 {
     mRtv->Release();
-    // The release of depth stencil view was not here originally. Added by me, remove if it gives errors
     mDsv->Release();
     mSwapChain->Release();
 }

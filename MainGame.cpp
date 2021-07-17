@@ -17,9 +17,6 @@ void MainGame::onCreate()
 	RECT rc = this->getClientWindowRect();
 	mSwapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->mHwnd, rc.right - rc.left, rc.bottom - rc.top);
 
-	// Clear the whole window and show a solid color
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->mSwapChain, 0, 0.3f, 0.4f, 1);
-
 	// ------------------------------------------------------
 	// Temp - used for testing; DELETE AFTER
 	// ------------------------------------------------------
@@ -29,24 +26,29 @@ void MainGame::onCreate()
 		{ Vec3(.5f, -.5f, .0f) },
 	};
 
-	void* shader_byte_code = nullptr;
-	size_t size_shader = 0;
+	void* sbc1 = nullptr;
+	size_t ss1 = 0;
+	void* sbc2 = nullptr;
+	size_t ss2 = 0;
 
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"shader.fx", "vsmain", &shader_byte_code, &size_shader);
-	mTempVertexShader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(&shader_byte_code, size_shader);
+	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"shader.fx", "vsmain", &sbc1, &ss1);
+	mTempVertexShader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(&sbc1, ss1);
+
+	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"shader.fx", "psmain", &sbc2, &ss2);
+	mTempPixelShader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(&sbc2, ss2);
+
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"shader.fx", "psmain", &shader_byte_code, &size_shader);
-	mTempPixelShader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(&shader_byte_code, size_shader);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	mTempVertexBuffer = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(list, sizeof(vertex), ARRAYSIZE(list), shader_byte_code, size_shader);
+	mTempVertexBuffer = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(list, sizeof(vertex), ARRAYSIZE(list), sbc1, ss1);
 	// ------------------------------------------------------
 }
 
 void MainGame::onUpdate()
 {
 	Window::onUpdate();
+
+	// Clear the whole window and show a solid color
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->mSwapChain, 0, 0.3f, 0.4f, 1);
 
 	// Set viewport of render target in which we have to draw (the whole screen)
 	RECT rc = this->getClientWindowRect();
