@@ -32,10 +32,10 @@ void MainGame::onCreate()
 	size_t ss2 = 0;
 
 	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"shader.fx", "vsmain", &sbc1, &ss1);
-	mTempVertexShader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(&sbc1, ss1);
+	mTempVertexShader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(sbc1, ss1);
 
 	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"shader.fx", "psmain", &sbc2, &ss2);
-	mTempPixelShader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(&sbc2, ss2);
+	mTempPixelShader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(sbc2, ss2);
 
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
