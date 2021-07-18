@@ -3,12 +3,16 @@
 #include "Prerequisites.h"
 #include "RenderSystem.h"
 
+/*
+* Holds information about the vertices of the mesh.
+*/
+
 class VertexBuffer
 {
 
 public:
 	VertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list, 
-		void* shader_byte_code, UINT size_byte_shader, RenderSystem* system);
+		void* shader_byte_code, size_t size_byte_shader, RenderSystem* system);
 	~VertexBuffer();
 
 public:

@@ -43,6 +43,15 @@
     <Filter Include="GameEngine\GraphicsEngine\RenderSystem\PixelShader">
       <UniqueIdentifier>{ea4c38a4-9d5c-4794-98f6-c11e9b07798f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameClient\GlobalShaders\TestShaders">
+      <UniqueIdentifier>{1022f4a3-4399-4490-b34d-b40d53b99410}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameClient\GlobalShaders\DirectionalLight">
+      <UniqueIdentifier>{4dd80fbb-2fb0-4e3d-a737-7b4e2c91b1c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameEngine\GraphicsEngine\RenderSystem\ConstantBuffer">
+      <UniqueIdentifier>{9a199312-aee0-4896-ab12-b849d5d77382}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -74,6 +83,9 @@
     </ClCompile>
     <ClCompile Include="PixelShader.cpp">
       <Filter>GameEngine\GraphicsEngine\RenderSystem\PixelShader</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBuffer.cpp">
+      <Filter>GameEngine\GraphicsEngine\RenderSystem\ConstantBuffer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,16 +134,25 @@
     <ClInclude Include="PixelShader.h">
       <Filter>GameEngine\GraphicsEngine\RenderSystem\PixelShader</Filter>
     </ClInclude>
+    <ClInclude Include="ConstantBuffer.h">
+      <Filter>GameEngine\GraphicsEngine\RenderSystem\ConstantBuffer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="DirectionalLightVS.hlsl">
-      <Filter>GameClient\GlobalShaders</Filter>
-    </FxCompile>
-    <FxCompile Include="DirectionalLightPS.hlsl">
-      <Filter>GameClient\GlobalShaders</Filter>
-    </FxCompile>
     <FxCompile Include="VertexMeshLayoutShader.hlsl">
       <Filter>GameClient\GlobalShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VShader.hlsl">
+      <Filter>GameClient\GlobalShaders\TestShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PShader.hlsl">
+      <Filter>GameClient\GlobalShaders\TestShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalLightVS.hlsl">
+      <Filter>GameClient\GlobalShaders\DirectionalLight</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalLightPS.hlsl">
+      <Filter>GameClient\GlobalShaders\DirectionalLight</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

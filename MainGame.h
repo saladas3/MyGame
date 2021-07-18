@@ -1,13 +1,9 @@
 #pragma once
 
 #include "Window.h"
-#include "SwapChain.h"
+#include "Vectors.h"
 #include "InputListener.h"
 #include "GraphicsEngine.h"
-#include "Vectors.h"
-
-// Temp - used for testing; DELETE AFTER
-#include "VertexBuffer.h"
 
 class MainGame : public Window, public InputListener
 {
@@ -34,10 +30,15 @@ public:
     virtual void onRightMouseDown(const Point& mouse_pos) override;
     virtual void onRightMouseUp(const Point& mouse_pos) override;
 
+private:
+    // ------------------------------------------------------
     // Temp - used for testing; DELETE AFTER
+    // ------------------------------------------------------
     VertexBufferPtr mTempVertexBuffer = nullptr;
     VertexShaderPtr mTempVertexShader = nullptr;
     PixelShaderPtr mTempPixelShader = nullptr;
+    ConstantBufferPtr mTempConstantBuffer = nullptr;
+    // ------------------------------------------------------
 
 private:
     SwapChainPtr mSwapChain = nullptr;

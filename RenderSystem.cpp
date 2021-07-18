@@ -70,7 +70,7 @@ SwapChainPtr RenderSystem::createSwapChain(HWND hwnd, UINT width, UINT height)
     return std::make_shared<SwapChain>(hwnd, width, height, this);
 }
 
-VertexBufferPtr RenderSystem::createVertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list, void* shader_byte_code, UINT size_byte_shader)
+VertexBufferPtr RenderSystem::createVertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list, void* shader_byte_code, size_t size_byte_shader)
 {
     return std::make_shared<VertexBuffer>(list_vertices, size_vertex, size_list, shader_byte_code, size_byte_shader, this);
 }
@@ -83,6 +83,11 @@ VertexShaderPtr RenderSystem::createVertexShader(const void* shader_byte_code, s
 PixelShaderPtr RenderSystem::createPixelShader(const void* shader_byte_code, size_t byte_code_size)
 {
     return std::make_shared<PixelShader>(shader_byte_code, byte_code_size, this);
+}
+
+ConstantBufferPtr RenderSystem::createConstantBuffer(void* buffer, UINT size_buffer)
+{
+    return std::make_shared<ConstantBuffer>(buffer, size_buffer, this);;
 }
 
 DeviceContextPtr RenderSystem::getImmediateDeviceContext()

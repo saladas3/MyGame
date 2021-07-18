@@ -75,7 +75,7 @@ public:
 
     static Vec3 normalize(const Vec3& vec) {
         Vec3 res;
-        float len = sqrt((vec.m_x * vec.m_x) + (vec.m_y * vec.m_y) + (vec.m_z * vec.m_z));
+        float len = sqrtf((vec.m_x * vec.m_x) + (vec.m_y * vec.m_y) + (vec.m_z * vec.m_z));
 
         if (len == 0)
             return Vec3();
@@ -99,7 +99,7 @@ public:
     //  by passing only the difference between them
     //  because sqrt is expensive
     static float calculateDistance(const Vec3& diff) {
-        return sqrt(diff.m_x * diff.m_x + diff.m_y * diff.m_y + diff.m_z * diff.m_z);
+        return sqrtf(diff.m_x * diff.m_x + diff.m_y * diff.m_y + diff.m_z * diff.m_z);
     }
 
     static Vec3 calculateMin(const Vec3& vec, float radius) {

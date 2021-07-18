@@ -2,7 +2,6 @@
 
 #include "Prerequisites.h"
 #include "RenderSystem.h"
-#include "VertexBuffer.h"
 
 /*
  * A device context is similar to a device, but it is responsible for managing the GPU
@@ -25,11 +24,16 @@ public:
 	void setVertexBuffer(const VertexBufferPtr& vertex_buffer);
 	void setVertexShader(const VertexShaderPtr& vertex_shader);
 	void setPixelShader(const PixelShaderPtr& pixel_shader);
+	void setConstantBuffer(const VertexShaderPtr& vertex_shader, const ConstantBufferPtr& buffer);
+	void setConstantBuffer(const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& buffer);
 	void setViewportSize(UINT width, UINT height);
 
 private:
 	ID3D11DeviceContext* mDeviceContext = nullptr;
 	RenderSystem* mRenderSystem = nullptr;
+
+private:
+	friend class ConstantBuffer;
 
 };
 

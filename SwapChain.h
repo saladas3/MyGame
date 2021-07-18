@@ -1,7 +1,7 @@
 #pragma once
 
-#include "RenderSystem.h"
 #include "Prerequisites.h"
+#include "RenderSystem.h"
 
 /*
  * The SwapChain is a collection of buffers that swap their values continuously

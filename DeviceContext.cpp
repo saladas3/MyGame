@@ -19,6 +19,11 @@ void DeviceContext::clearRenderTargetColor(const SwapChainPtr& swap_chain, float
 	mDeviceContext->OMSetRenderTargets(1, &swap_chain->mRtv, swap_chain->mDsv);
 }
 
+// --------------------------------------------------
+// Draw functions -> executes every stage in the graphics pipeline when Draw() is called
+// The triangles are drawn in a clockwise orientation
+// It must be clockwise in order the know if the triangles are facing towards the camera
+// --------------------------------------------------
 void DeviceContext::drawTriangleList(UINT vertex_count, UINT start_vertex_index)
 {
 	mDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -36,6 +41,7 @@ void DeviceContext::drawTriangleStrip(UINT vertex_count, UINT start_vertex_index
 	mDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	mDeviceContext->Draw(vertex_count, start_vertex_index);
 }
+// --------------------------------------------------
 
 void DeviceContext::setVertexBuffer(const VertexBufferPtr& vertex_buffer)
 {
@@ -53,6 +59,16 @@ void DeviceContext::setVertexShader(const VertexShaderPtr& vertex_shader)
 void DeviceContext::setPixelShader(const PixelShaderPtr& pixel_shader)
 {
 	mDeviceContext->PSSetShader(pixel_shader->mPs, nullptr, 0);
+}
+
+void DeviceContext::setConstantBuffer(const VertexShaderPtr& vertex_shader, const ConstantBufferPtr& buffer)
+{
+	mDeviceContext->VSSetConstantBuffers(0, 1, &buffer->mBuffer);
+}
+
+void DeviceContext::setConstantBuffer(const PixelShaderPtr& pixel_shader, const ConstantBufferPtr& buffer)
+{
+	mDeviceContext->PSSetConstantBuffers(0, 1, &buffer->mBuffer);
 }
 
 void DeviceContext::setViewportSize(UINT width, UINT height)

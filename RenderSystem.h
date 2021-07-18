@@ -6,6 +6,7 @@
 #include "VertexBuffer.h"
 #include "VertexShader.h"
 #include "PixelShader.h"
+#include "ConstantBuffer.h"
 
 class RenderSystem
 {
@@ -19,9 +20,12 @@ public:
 public:
 	SwapChainPtr createSwapChain(HWND hwnd, UINT width, UINT height);
     VertexBufferPtr createVertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list,
-        void* shader_byte_code, UINT size_byte_shader);
+        void* shader_byte_code, size_t size_byte_shader);
     VertexShaderPtr createVertexShader(const void* shader_byte_code, size_t byte_code_size);
     PixelShaderPtr createPixelShader(const void* shader_byte_code, size_t byte_code_size);
+    ConstantBufferPtr createConstantBuffer(void* buffer, UINT size_buffer);
+
+public:
     DeviceContextPtr getImmediateDeviceContext();
 
     // Methods used to compile a shader file (.hlsl file)
@@ -61,6 +65,7 @@ private:
     friend class VertexBuffer;
     friend class VertexShader;
     friend class PixelShader;
+    friend class ConstantBuffer;
 
 };
 
