@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "Vectors.h"
+#include "Matrix4x4.h"
 #include "InputListener.h"
 #include "GraphicsEngine.h"
 
@@ -34,6 +34,16 @@ private:
     // ------------------------------------------------------
     // Temp - used for testing; DELETE AFTER
     // ------------------------------------------------------
+    void testMethod();
+
+    float mOldDelta = 0; // Time point when the previous frame was rendered
+    float mNewDelta = 0; // Time point when the current frame was rendered
+    float mDeltaTime = 0; // Difference between the 2 above
+
+    float mDeltaPos = 0;
+
+    float mDeltaScale = 0;
+
     VertexBufferPtr mTempVertexBuffer = nullptr;
     VertexShaderPtr mTempVertexShader = nullptr;
     PixelShaderPtr mTempPixelShader = nullptr;
