@@ -1,14 +1,16 @@
 #include "MainGame.h"
-#include "GraphicsEngine.h"
 #include <iostream>
 
 int main() {
 	try
 	{
 		GraphicsEngine::create();
-		//InputSystem::create();
+		InputSystem::create();
 	}
-	catch (...) { return -1; }
+	catch (const std::exception& ex) {
+		std::cerr << "ERROR: " << ex.what() << std::endl;
+		return -1;
+	}
 
 	{
 		try
@@ -18,13 +20,13 @@ int main() {
 		}
 		catch (const std::exception& ex) {
 			std::cerr << "ERROR: " << ex.what() << std::endl;
-			//InputSystem::release();
+			InputSystem::release();
 			GraphicsEngine::release();
 			return -1;
 		}
 	}
 
-	//InputSystem::release();
+	InputSystem::release();
 	GraphicsEngine::release();
 
 	return 0;

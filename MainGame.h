@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "Matrix4x4.h"
 #include "InputListener.h"
+#include "InputSystem.h"
 #include "GraphicsEngine.h"
 
 class MainGame : public Window, public InputListener
@@ -40,14 +41,13 @@ private:
     float mNewDelta = 0; // Time point when the current frame was rendered
     float mDeltaTime = 0; // Difference between the 2 above
 
-    float mDeltaPos = 0;
-
     float mDeltaScale = 0;
 
     VertexBufferPtr mTempVertexBuffer = nullptr;
     VertexShaderPtr mTempVertexShader = nullptr;
     PixelShaderPtr mTempPixelShader = nullptr;
     ConstantBufferPtr mTempConstantBuffer = nullptr;
+    IndexBufferPtr mTempIndexBuffer = nullptr;
     // ------------------------------------------------------
 
 private:

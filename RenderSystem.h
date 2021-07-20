@@ -7,6 +7,7 @@
 #include "VertexShader.h"
 #include "PixelShader.h"
 #include "ConstantBuffer.h"
+#include "IndexBuffer.h"
 
 class RenderSystem
 {
@@ -24,6 +25,7 @@ public:
     VertexShaderPtr createVertexShader(const void* shader_byte_code, size_t byte_code_size);
     PixelShaderPtr createPixelShader(const void* shader_byte_code, size_t byte_code_size);
     ConstantBufferPtr createConstantBuffer(void* buffer, UINT size_buffer);
+    IndexBufferPtr createIndexBuffer(void* list_indices, UINT size_list);
 
 public:
     DeviceContextPtr getImmediateDeviceContext();
@@ -66,6 +68,7 @@ private:
     friend class VertexShader;
     friend class PixelShader;
     friend class ConstantBuffer;
+    friend class IndexBuffer;
 
 };
 

@@ -10,7 +10,6 @@ MainGame::~MainGame() = default;
 struct vertex
 {
 	Vec3 position;
-	Vec3 position1;
 	Vec3 color;
 	Vec3 color1;
 };
@@ -36,16 +35,48 @@ void MainGame::onCreate()
 	RECT rc = this->getClientWindowRect();
 	mSwapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->mHwnd, rc.right - rc.left, rc.bottom - rc.top);
 
+	InputSystem::get()->addListener(this);
+	//InputSystem::get()->showCursor(false);
+
 	// ------------------------------------------------------
 	// Temp - used for testing; DELETE AFTER
 	// ------------------------------------------------------
-	// 4 vertices - their information is stored in vertex buffer
 	vertex list[] = {
-		{ Vec3(-0.5f,-0.5f,0.0f), Vec3(-0.32f,-0.11f,0.0f), Vec3(0,0,0), Vec3(0,1,0) },
-		{ Vec3(-0.5f,0.5f,0.0f), Vec3(-0.11f,0.78f,0.0f), Vec3(1,1,0), Vec3(0,1,1) },
-		{ Vec3(0.5f,-0.5f,0.0f), Vec3(0.75f,-0.73f,0.0f), Vec3(0,0,1), Vec3(1,0,0) },
-		{ Vec3(0.5f,0.5f,0.0f), Vec3(0.88f,0.77f,0.0f), Vec3(1,1,1), Vec3(0,0,1) }
+		// Front face of the cube
+		{ Vec3(-0.5f,-0.5f,-0.5f),	Vec3(1,0,0),	Vec3(0.2f,0,0)		},
+		{ Vec3(-0.5f,0.5f,-0.5f),	Vec3(1,1,0),	Vec3(0.2f,0.2f,0)	},
+		{ Vec3(0.5f,0.5f,-0.5f),	Vec3(1,1,0),	Vec3(0.2f,0.2f,0)	},
+		{ Vec3(0.5f,-0.5f,-0.5f),	Vec3(1,0,0),	Vec3(0.2f,0,0)		},
+
+		// Back face of the cube
+		{ Vec3(0.5f,-0.5f,0.5f),	Vec3(0,1,0),	Vec3(0,0.2f,0)		},
+		{ Vec3(0.5f,0.5f,0.5f),		Vec3(0,1,1),	Vec3(0,0.2f,0.2f)	},
+		{ Vec3(-0.5f,0.5f,0.5f),	Vec3(0,1,1),	Vec3(0,0.2f,0.2f)	},
+		{ Vec3(-0.5f,-0.5f,0.5f),	Vec3(0,1,0),	Vec3(0,0.2f,0)		}
 	};
+
+	unsigned int index_list[] = {
+		// FRONT SIDE
+		0,1,2,  //FIRST TRIANGLE
+		2,3,0,  //SECOND TRIANGLE
+		// BACK SIDE
+		4,5,6,
+		6,7,4,
+		// TOP SIDE
+		1,6,5,
+		5,2,1,
+		// BOTTOM SIDE
+		7,0,3,
+		3,4,7,
+		// RIGHT SIDE
+		3,2,5,
+		5,4,3,
+		// LEFT SIDE
+		7,6,1,
+		1,0,7
+	};
+
+	mTempIndexBuffer = GraphicsEngine::get()->getRenderSystem()->createIndexBuffer(index_list, ARRAYSIZE(index_list));
 
 	void* sbc1 = nullptr;
 	size_t ss1 = 0;
@@ -73,6 +104,8 @@ void MainGame::onCreate()
 void MainGame::onUpdate()
 {
 	Window::onUpdate();
+
+	InputSystem::get()->update();
 
 	// Clear the whole window and show a solid color
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->mSwapChain, 0, 0.3f, 0.4f, 1);
@@ -103,16 +136,20 @@ void MainGame::onDestroy()
 void MainGame::onFocus()
 {
 	Window::onFocus();
+	InputSystem::get()->addListener(this);
 }
 
 void MainGame::onKillFocus()
 {
 	Window::onKillFocus();
+	InputSystem::get()->removeListener(this);
 }
 
 void MainGame::onResize()
 {
 	Window::onResize();
+	RECT rc = this->getClientWindowRect();
+	mSwapChain->resize(rc.right - rc.left, rc.bottom - rc.top);
 }
 
 void MainGame::onKeyDown(int key)
@@ -145,25 +182,35 @@ void MainGame::onRightMouseUp(const Point& mouse_pos)
 
 void MainGame::testMethod()
 {
-	mDeltaPos += mDeltaTime / 3.0f;
-	if (mDeltaPos > 1.0f) mDeltaPos = 0;
+	mDeltaScale += mDeltaTime / .55f;
 
-	mDeltaScale += mDeltaTime / 3.0f;
-
-	Matrix4x4 tempScaleMatrix;
+	Matrix4x4 tempMatrix;
 
 	constant cc;
 	cc.m_time = ::GetTickCount64(); // Get the time elapsed since the system was started in miliseconds
 
-	cc.m_world.setTranslation(Vec3::lerp(Vec3(-2, -2, 0), Vec3(2, 2, 0), mDeltaPos));
-	tempScaleMatrix.setScale(Vec3::lerp(Vec3(.5f, .5f, 0), Vec3(2, 2, 0), (sinf(mDeltaScale) + 1.0f) / 2.0f));
+	cc.m_world.setIdentity();
+	cc.m_world.setScale(Vec3(1, 1, 1));
 
-	cc.m_world *= tempScaleMatrix;
+	// Set rotation Z
+	tempMatrix.setIdentity();
+	tempMatrix.setRotationZ(mDeltaScale);
+	cc.m_world *= tempMatrix;
+
+	// Set rotation Y
+	tempMatrix.setIdentity();
+	tempMatrix.setRotationY(mDeltaScale);
+	cc.m_world *= tempMatrix;
+
+	// Set rotation X
+	tempMatrix.setIdentity();
+	tempMatrix.setRotationX(mDeltaScale);
+	cc.m_world *= tempMatrix;
 
 	cc.m_view.setIdentity();
 	cc.m_proj.setOrthoLH(
-		(this->getClientWindowRect().right - this->getClientWindowRect().left) / 400.0f,
-		(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 400.0f,
+		(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
+		(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 300.0f,
 		-4.0f,
 		4.0f
 	);
@@ -182,6 +229,9 @@ void MainGame::testMethod()
 	// Set Vertex Buffer
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mTempVertexBuffer);
 
+	// Set Index Buffer
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mTempIndexBuffer);
+
 	// Draw the vertices
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawTriangleStrip(mTempVertexBuffer->getSizeVertexList(), 0);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(mTempIndexBuffer->getSizeIndexList(), 0, 0);
 }

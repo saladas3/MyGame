@@ -87,7 +87,12 @@ PixelShaderPtr RenderSystem::createPixelShader(const void* shader_byte_code, siz
 
 ConstantBufferPtr RenderSystem::createConstantBuffer(void* buffer, UINT size_buffer)
 {
-    return std::make_shared<ConstantBuffer>(buffer, size_buffer, this);;
+    return std::make_shared<ConstantBuffer>(buffer, size_buffer, this);
+}
+
+IndexBufferPtr RenderSystem::createIndexBuffer(void* list_indices, UINT size_list)
+{
+    return std::make_shared<IndexBuffer>(list_indices, size_list, this);
 }
 
 DeviceContextPtr RenderSystem::getImmediateDeviceContext()

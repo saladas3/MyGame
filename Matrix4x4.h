@@ -21,12 +21,6 @@ public:
 
     void setTranslation(const Vec3& translation)
     {
-        // ------------------------------------------------------
-        // Temp - used for testing; DELETE AFTER
-        // ------------------------------------------------------
-        // The translation matrix should not be reset every time we call setTranslation. Delete this after testing
-        this->setIdentity();
-        // ------------------------------------------------------
         mMatrix[3][0] = translation.m_x;
         mMatrix[3][1] = translation.m_y;
         mMatrix[3][2] = translation.m_z;
@@ -34,12 +28,6 @@ public:
 
     void setScale(const Vec3& scale)
     {
-        // ------------------------------------------------------
-        // Temp - used for testing; DELETE AFTER
-        // ------------------------------------------------------
-        // The translation matrix should not be reset every time we call setTranslation. Delete this after testing
-        this->setIdentity();
-        // ------------------------------------------------------
         mMatrix[0][0] = scale.m_x;
         mMatrix[1][1] = scale.m_y;
         mMatrix[2][2] = scale.m_z;

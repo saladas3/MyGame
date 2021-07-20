@@ -71,6 +71,11 @@ void DeviceContext::setConstantBuffer(const PixelShaderPtr& pixel_shader, const 
 	mDeviceContext->PSSetConstantBuffers(0, 1, &buffer->mBuffer);
 }
 
+void DeviceContext::setIndexBuffer(const IndexBufferPtr& index_buffer)
+{
+	mDeviceContext->IASetIndexBuffer(index_buffer->mBuffer, DXGI_FORMAT_R32_UINT, 0);
+}
+
 void DeviceContext::setViewportSize(UINT width, UINT height)
 {
 	D3D11_VIEWPORT vp = {};

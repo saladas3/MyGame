@@ -1,7 +1,9 @@
 #include "SwapChain.h"
 
-SwapChain::SwapChain(HWND hWnd, UINT width, UINT height, RenderSystem* renderSystem) : mRenderSystem(renderSystem)
+SwapChain::SwapChain(HWND hWnd, UINT width, UINT height, RenderSystem* renderSystem)
 {
+    mRenderSystem = renderSystem;
+
     DXGI_SWAP_CHAIN_DESC desc;
 
     // Clear out the memory for the struct to use
