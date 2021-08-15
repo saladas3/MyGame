@@ -9,21 +9,19 @@ int main() {
 	}
 	catch (const std::exception& ex) {
 		std::cerr << "ERROR: " << ex.what() << std::endl;
-		return -1;
+		return 1;
 	}
 
+	try
 	{
-		try
-		{
-			MainGame app;
-			while (app.isRunning());
-		}
-		catch (const std::exception& ex) {
-			std::cerr << "ERROR: " << ex.what() << std::endl;
-			InputSystem::release();
-			GraphicsEngine::release();
-			return -1;
-		}
+		MainGame app;
+		while (app.isRunning());
+	}
+	catch (const std::exception& ex) {
+		std::cerr << "ERROR: " << ex.what() << std::endl;
+		InputSystem::release();
+		GraphicsEngine::release();
+		return 1;
 	}
 
 	InputSystem::release();

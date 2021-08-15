@@ -154,6 +154,31 @@ void MainGame::onResize()
 
 void MainGame::onKeyDown(int key)
 {
+	switch (key)
+	{
+		case 'W':
+		{
+			mRotX += mDeltaTime * 3;
+			break;
+		}
+		case 'S':
+		{
+			mRotX -= mDeltaTime * 3;
+			break;
+		}
+		case 'A':
+		{
+			mRotY += mDeltaTime * 3;
+			break;
+		}
+		case 'D':
+		{
+			mRotY -= mDeltaTime * 3;
+			break;
+		}
+		default:
+			break;
+	}
 }
 
 void MainGame::onKeyUp(int key)
@@ -162,6 +187,8 @@ void MainGame::onKeyUp(int key)
 
 void MainGame::onMouseMove(const Point& mouse_pos)
 {
+	mRotX -= mDeltaTime * mouse_pos.m_y / 500.0f;
+	mRotY -= mDeltaTime * mouse_pos.m_x / 500.0f;
 }
 
 void MainGame::onLeftMouseDown(const Point& mouse_pos)
@@ -182,8 +209,6 @@ void MainGame::onRightMouseUp(const Point& mouse_pos)
 
 void MainGame::testMethod()
 {
-	mDeltaScale += mDeltaTime / .55f;
-
 	Matrix4x4 tempMatrix;
 
 	constant cc;
@@ -192,19 +217,14 @@ void MainGame::testMethod()
 	cc.m_world.setIdentity();
 	cc.m_world.setScale(Vec3(1, 1, 1));
 
-	// Set rotation Z
-	tempMatrix.setIdentity();
-	tempMatrix.setRotationZ(mDeltaScale);
-	cc.m_world *= tempMatrix;
-
 	// Set rotation Y
 	tempMatrix.setIdentity();
-	tempMatrix.setRotationY(mDeltaScale);
+	tempMatrix.setRotationY(mRotY);
 	cc.m_world *= tempMatrix;
 
 	// Set rotation X
 	tempMatrix.setIdentity();
-	tempMatrix.setRotationX(mDeltaScale);
+	tempMatrix.setRotationX(mRotX);
 	cc.m_world *= tempMatrix;
 
 	cc.m_view.setIdentity();

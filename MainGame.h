@@ -6,6 +6,8 @@
 #include "InputSystem.h"
 #include "GraphicsEngine.h"
 
+#include <iostream>
+
 class MainGame : public Window, public InputListener
 {
 
@@ -41,7 +43,9 @@ private:
     float mNewDelta = 0; // Time point when the current frame was rendered
     float mDeltaTime = 0; // Difference between the 2 above
 
-    float mDeltaScale = 0;
+    float mRotX = 0;
+    float mRotY = 0;
+    float mRotZ = 0;
 
     VertexBufferPtr mTempVertexBuffer = nullptr;
     VertexShaderPtr mTempVertexShader = nullptr;
