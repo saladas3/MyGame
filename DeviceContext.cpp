@@ -43,6 +43,14 @@ void DeviceContext::drawTriangleStrip(UINT vertex_count, UINT start_vertex_index
 }
 // --------------------------------------------------
 
+void DeviceContext::clearRenderTargetColor(const TexturePtr& render_target, float red, float green, float blue, float alpha)
+{
+}
+
+void DeviceContext::clearDepthStencil(const TexturePtr& depth_stencil)
+{
+}
+
 void DeviceContext::setVertexBuffer(const VertexBufferPtr& vertex_buffer)
 {
 	UINT stride = vertex_buffer->mSizeVertex;
@@ -59,6 +67,32 @@ void DeviceContext::setVertexShader(const VertexShaderPtr& vertex_shader)
 void DeviceContext::setPixelShader(const PixelShaderPtr& pixel_shader)
 {
 	mDeviceContext->PSSetShader(pixel_shader->mPs, nullptr, 0);
+}
+
+void DeviceContext::setTexture(const VertexShaderPtr& vertex_shader, const TexturePtr* texture, unsigned int num_textures)
+{
+	ID3D11ShaderResourceView* list_res[32];
+	ID3D11SamplerState* list_sampler[32];
+	for (UINT i = 0; i < num_textures; i++)
+	{
+		list_res[i] = texture[i]->mShaderResView;
+		list_sampler[i] = texture[i]->mSamplerState;
+	}
+	mDeviceContext->VSSetShaderResources(0, num_textures, list_res);
+	mDeviceContext->VSSetSamplers(0, num_textures, list_sampler);
+}
+
+void DeviceContext::setTexture(const PixelShaderPtr& pixel_shader, const TexturePtr* texture, unsigned int num_textures)
+{
+	ID3D11ShaderResourceView* list_res[32];
+	ID3D11SamplerState* list_sampler[32];
+	for (UINT i = 0; i < num_textures; i++)
+	{
+		list_res[i] = texture[i]->mShaderResView;
+		list_sampler[i] = texture[i]->mSamplerState;
+	}
+	mDeviceContext->PSSetShaderResources(0, num_textures, list_res);
+	mDeviceContext->PSSetSamplers(0, num_textures, list_sampler);
 }
 
 void DeviceContext::setConstantBuffer(const VertexShaderPtr& vertex_shader, const ConstantBufferPtr& buffer)

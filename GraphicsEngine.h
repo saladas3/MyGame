@@ -2,6 +2,8 @@
 
 #include "Prerequisites.h"
 #include "RenderSystem.h"
+#include "TextureManager.h"
+#include "MeshManager.h"
 
 class GraphicsEngine
 {
@@ -15,6 +17,8 @@ private:
 
 public:
 	RenderSystem* getRenderSystem();
+	TextureManager* getTextureManager();
+	MeshManager* getMeshManager();
 
 public:
 	// The get method that gives the only instance of GraphicsEngine
@@ -24,6 +28,8 @@ public:
 
 private:
 	RenderSystem* mRenderSystem = nullptr;
+	TextureManager* mTexManager = nullptr;
+	MeshManager* mMeshManager = nullptr;
 
 private:
 	unsigned char mMeshLayoutByteCode[1024];

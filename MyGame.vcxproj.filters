@@ -55,6 +55,15 @@
     <Filter Include="GameEngine\GraphicsEngine\RenderSystem\IndexBuffer">
       <UniqueIdentifier>{3a997300-e3ff-4fb8-a265-43df041b09d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameEngine\GraphicsEngine\ResourceManager">
+      <UniqueIdentifier>{23fed0c8-57cd-48d4-8d00-0962d4ea43e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameEngine\GraphicsEngine\ResourceManager\MeshManager">
+      <UniqueIdentifier>{2deb1652-53bb-4c1d-8493-b3927a4dc4c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameEngine\GraphicsEngine\ResourceManager\TextureManager">
+      <UniqueIdentifier>{994021e2-741e-4857-958e-8bbdbff2c956}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -95,6 +104,24 @@
     </ClCompile>
     <ClCompile Include="InputSystem.cpp">
       <Filter>GameEngine\InputSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager\TextureManager</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManager.cpp">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager\TextureManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager\MeshManager</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshManager.cpp">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager\MeshManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +178,30 @@
     </ClInclude>
     <ClInclude Include="InputSystem.h">
       <Filter>GameEngine\InputSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager\TextureManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager\TextureManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Rect.h">
+      <Filter>GameEngine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshManager.h">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager\MeshManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager\MeshManager</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexMesh.h">
+      <Filter>GameEngine\GraphicsEngine\ResourceManager\MeshManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

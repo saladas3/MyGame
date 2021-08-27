@@ -12,7 +12,7 @@ public:
 public:
     void setIdentity()
     {
-        ::memset(mMatrix, 0, sizeof(float) * 16); // Reset the matrix by filling it with 0
+        ::memset(mMatrix, 0, sizeof(float) * 16); // Fill matrix with 0
         mMatrix[0][0] = 1;
         mMatrix[1][1] = 1;
         mMatrix[2][2] = 1;
@@ -96,11 +96,10 @@ public:
             v.cross(vec[0], vec[1], vec[2]);
 
             out.mMatrix[0][i] = (float)pow(-1.0f, i) * v.m_x / det;
-            out.mMatrix[1][i] = (float)(-1.0f, i) * v.m_y / det;
-            out.mMatrix[2][i] = (float)(-1.0f, i) * v.m_z / det;
-            out.mMatrix[3][i] = (float)(-1.0f, i) * v.m_w / det;
+            out.mMatrix[1][i] = (float)pow(-1.0f, i) * v.m_y / det;
+            out.mMatrix[2][i] = (float)pow(-1.0f, i) * v.m_z / det;
+            out.mMatrix[3][i] = (float)pow(-1.0f, i) * v.m_w / det;
         }
-
         this->setMatrix(out);
     }
 
@@ -137,6 +136,13 @@ public:
         return Vec3(mMatrix[3][0], mMatrix[3][1], mMatrix[3][2]);
     }
 
+    /// <summary>
+    /// Perspective projection matrix. FOV = field of view angle
+    /// </summary>
+    /// <param name="fov">The angle that gives the field of view</param>
+    /// <param name="aspect"></param>
+    /// <param name="znear">Distance between the origin and the camera and the near plane along the view direction</param>
+    /// <param name="zfar">Distance between the origin and the camera and the far plane along the view direction</param>
     void setPerspectiveFovLH(float fov, float aspect, float znear, float zfar)
     {
         float yScale = 1.0f / tanf(fov / 2.0f);

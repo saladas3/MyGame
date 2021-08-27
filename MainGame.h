@@ -47,6 +47,13 @@ private:
     float mRotY = 0;
     float mRotZ = 0;
 
+    float mForward = 0;
+    float mRightward = 0;
+
+    Matrix4x4 mWorldCam;
+
+    TexturePtr mWoodTex = nullptr;
+
     VertexBufferPtr mTempVertexBuffer = nullptr;
     VertexShaderPtr mTempVertexShader = nullptr;
     PixelShaderPtr mTempPixelShader = nullptr;

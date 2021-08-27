@@ -69,6 +69,7 @@ private:
     friend class PixelShader;
     friend class ConstantBuffer;
     friend class IndexBuffer;
+    friend class Texture;
 
 };
 
