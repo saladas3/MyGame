@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 
 class GraphicsEngine;

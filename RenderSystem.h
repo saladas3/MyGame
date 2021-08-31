@@ -20,8 +20,13 @@ public:
 
 public:
 	SwapChainPtr createSwapChain(HWND hwnd, UINT width, UINT height);
-    VertexBufferPtr createVertexBuffer(void* list_vertices, UINT size_vertex, UINT size_list,
-        void* shader_byte_code, size_t size_byte_shader);
+    VertexBufferPtr createVertexBuffer(
+        void* list_vertices,
+        UINT size_vertex,
+        UINT size_list,
+        void* shader_byte_code,
+        size_t size_byte_shader
+    );
     VertexShaderPtr createVertexShader(const void* shader_byte_code, size_t byte_code_size);
     PixelShaderPtr createPixelShader(const void* shader_byte_code, size_t byte_code_size);
     ConstantBufferPtr createConstantBuffer(void* buffer, UINT size_buffer);
@@ -31,8 +36,18 @@ public:
     DeviceContextPtr getImmediateDeviceContext();
 
     // Methods used to compile a shader file (.hlsl file)
-    bool compileVertexShader(const wchar_t* file_name, const char* entry_point_name, void** shader_byte_code, size_t* byte_code_size);
-    bool compilePixelShader(const wchar_t* file_name, const char* entry_point_name, void** shader_byte_code, size_t* byte_code_size);
+    bool compileVertexShader(
+        const wchar_t* file_name,
+        const char* entry_point_name,
+        void** shader_byte_code,
+        size_t* byte_code_size
+    );
+    bool compilePixelShader(
+        const wchar_t* file_name,
+        const char* entry_point_name,
+        void** shader_byte_code,
+        size_t* byte_code_size
+    );
     void releaseCompiledShader();
     void setRasterizerState(bool cull_front);
 
@@ -42,7 +57,6 @@ private:
 private:
     // DirectX Graphics Infrastructure (DXGI)
     // Members that start with I (Ex: ID3D11Device) are COM (Component Object Model) objects
-
     ID3D11Device* mD3DDevice = nullptr;
     D3D_FEATURE_LEVEL mFeatureLevel = D3D_FEATURE_LEVEL_11_0;
     IDXGIDevice* mDxgiDevice = nullptr;

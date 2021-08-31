@@ -128,7 +128,7 @@ public:
         m_w = vector.m_w;
     }
 
-    explicit Vec4(const Vec3& vector) : m_x(vector.m_x), m_y(vector.m_y), m_z(vector.m_z), m_w(1.0) {}
+    Vec4(const Vec3& vector) : m_x(vector.m_x), m_y(vector.m_y), m_z(vector.m_z), m_w(1.0) {}
 
     ~Vec4() = default;
    

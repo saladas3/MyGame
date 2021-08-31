@@ -27,7 +27,7 @@ float4 psmain(PS_INPUT input) : SV_TARGET
 	float4 color = Color.Sample(ColorSampler, float2(input.texcoord.x, 1.0 - input.texcoord.y));
 
 	// Ambient light
-	float ka = 8.5;
+	float ka = 8.0;
 	float3 ia = float3(0.09, 0.082, 0.082);
 	ia *= (color.rgb);
 

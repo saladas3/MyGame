@@ -20,11 +20,11 @@ Texture::Texture(const wchar_t* full_path) : Resource(full_path)
 
 		if (FAILED(res)) throw std::exception("Could not create Texture");
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC desc = {};
-		desc.Format = image_data.GetMetadata().format;
-		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		desc.Texture2D.MipLevels = (UINT)image_data.GetMetadata().mipLevels;
-		desc.Texture2D.MostDetailedMip = 0;
+		D3D11_SHADER_RESOURCE_VIEW_DESC shader_res_view_desc = {};
+		shader_res_view_desc.Format = image_data.GetMetadata().format;
+		shader_res_view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		shader_res_view_desc.Texture2D.MipLevels = image_data.GetMetadata().mipLevels;
+		shader_res_view_desc.Texture2D.MostDetailedMip = 0;
 
 		D3D11_SAMPLER_DESC sampler_desc = {};
 		sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -40,7 +40,7 @@ Texture::Texture(const wchar_t* full_path) : Resource(full_path)
 		if (FAILED(res)) throw std::exception("Could not create sampler state for texture");
 
 		res = GraphicsEngine::get()->getRenderSystem()->mD3DDevice->CreateShaderResourceView(
-			mTexture, &desc, &mShaderResView
+			mTexture, &shader_res_view_desc, &mShaderResView
 		);
 		if (FAILED(res)) throw std::exception("Could not create shader resource view for texture");
 	}
@@ -109,11 +109,11 @@ Texture::Texture(const Rect& size, Texture::Type type) : Resource(L"")
 
 Texture::~Texture()
 {
-	if (mTexture) mTexture->Release();
 	if (mShaderResView) mShaderResView->Release();
 	if (mRenderTargetView) mRenderTargetView->Release();
 	if (mDepthStencilView) mDepthStencilView->Release();
 	if (mSamplerState) mSamplerState->Release();
+	if (mTexture) mTexture->Release();
 }
 
 Rect Texture::getSize()

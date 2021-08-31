@@ -4,16 +4,6 @@ MainGame::MainGame() = default;
 
 MainGame::~MainGame() = default;
 
-// ------------------------------------------------------
-// Temp - used for testing; DELETE AFTER
-// ------------------------------------------------------
-struct vertex
-{
-	Vec3 position;
-	Vec2 texcoord;
-};
-// ------------------------------------------------------
-
 // Structure created to be passed through the constant buffer
 // DirectX handles the constant data in video memory in chunks of 16B
 //  so if we have a structure with 24B this size must be modified to be multiple of 16 (+ 8B)
@@ -23,6 +13,10 @@ struct constant
 	Matrix4x4 m_world;
 	Matrix4x4 m_view;
 	Matrix4x4 m_proj;
+	Vec4 m_light_direction;
+	Vec4 m_camera_position;
+	Vec4 m_light_position = Vec4(0, 1, 0, 0);
+	float m_light_radius = 4.0f;
 	ULONGLONG m_time = 0;
 };
 
@@ -32,125 +26,34 @@ void MainGame::onCreate()
 
 	// Create the swap chain
 	RECT rc = this->getClientWindowRect();
-	mSwapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(this->mHwnd, rc.right - rc.left, rc.bottom - rc.top);
+	mSwapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(
+		this->mHwnd, rc.right - rc.left, rc.bottom - rc.top
+	);
 
 	InputSystem::get()->addListener(this);
 	InputSystem::get()->showCursor(false);
 
-	// ------------------------------------------------------
-	// Temp - used for testing; DELETE AFTER
-	// ------------------------------------------------------
+	// Base material - to hold the directional light property for most meshes
+	mBaseMat = GraphicsEngine::get()->createMaterial(
+		L"DirectionalLightVS.hlsl", L"DirectionalLightPS.hlsl"
+	);
+	mBaseMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
 
-	mWoodTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wood.jpg");
+	// Sky mesh
+	mSkyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere_hq.obj");
+	mSkyTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
+	mSkyMat = GraphicsEngine::get()->createMaterial(L"SkyBoxVS.hlsl", L"SkyBoxPS.hlsl");
+	mSkyMat->addTexture(mSkyTex);
+	mSkyMat->setCullMode(CULL_MODE::CULL_MODE_FRONT);
 
-	mWorldCam.setTranslation(Vec3(0, 0, -2));
-
-	Vec3 position_list[] =
-	{
-		{ Vec3(-0.5f,-0.5f,-0.5f)},
-		{ Vec3(-0.5f,0.5f,-0.5f) },
-		{ Vec3(0.5f,0.5f,-0.5f) },
-		{ Vec3(0.5f,-0.5f,-0.5f)},
-
-		//BACK FACE
-		{ Vec3(0.5f,-0.5f,0.5f) },
-		{ Vec3(0.5f,0.5f,0.5f) },
-		{ Vec3(-0.5f,0.5f,0.5f)},
-		{ Vec3(-0.5f,-0.5f,0.5f) }
-	};
-
-	Vec2 texcoord_list[] =
-	{
-		{ Vec2(0.0f,0.0f) },
-		{ Vec2(0.0f,1.0f) },
-		{ Vec2(1.0f,0.0f) },
-		{ Vec2(1.0f,1.0f) }
-	};
-
-	vertex vertex_list[] =
-	{
-		//X - Y - Z
-		//FRONT FACE
-		{ position_list[0],texcoord_list[1] },
-		{ position_list[1],texcoord_list[0] },
-		{ position_list[2],texcoord_list[2] },
-		{ position_list[3],texcoord_list[3] },
-
-
-		{ position_list[4],texcoord_list[1] },
-		{ position_list[5],texcoord_list[0] },
-		{ position_list[6],texcoord_list[2] },
-		{ position_list[7],texcoord_list[3] },
-
-
-		{ position_list[1],texcoord_list[1] },
-		{ position_list[6],texcoord_list[0] },
-		{ position_list[5],texcoord_list[2] },
-		{ position_list[2],texcoord_list[3] },
-
-		{ position_list[7],texcoord_list[1] },
-		{ position_list[0],texcoord_list[0] },
-		{ position_list[3],texcoord_list[2] },
-		{ position_list[4],texcoord_list[3] },
-
-		{ position_list[3],texcoord_list[1] },
-		{ position_list[2],texcoord_list[0] },
-		{ position_list[5],texcoord_list[2] },
-		{ position_list[4],texcoord_list[3] },
-
-		{ position_list[7],texcoord_list[1] },
-		{ position_list[6],texcoord_list[0] },
-		{ position_list[1],texcoord_list[2] },
-		{ position_list[0],texcoord_list[3] }
-
-	};
-
-	unsigned int index_list[] =
-	{
-		//FRONT SIDE
-		0,1,2,  //FIRST TRIANGLE
-		2,3,0,  //SECOND TRIANGLE
-		//BACK SIDE
-		4,5,6,
-		6,7,4,
-		//TOP SIDE
-		8,9,10,
-		10,11,8,
-		//BOTTOM SIDE
-		12,13,14,
-		14,15,12,
-		//RIGHT SIDE
-		16,17,18,
-		18,19,16,
-		//LEFT SIDE
-		20,21,22,
-		22,23,20
-	};
-
-
-	mTempIndexBuffer = GraphicsEngine::get()->getRenderSystem()->createIndexBuffer(index_list, ARRAYSIZE(index_list));
-
-	void* sbc1 = nullptr;
-	size_t ss1 = 0;
-	
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"VShader.hlsl", "vsmain", &sbc1, &ss1);
-	mTempVertexShader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(sbc1, ss1);
-	
-	// Need to create the vertex buffer before releasing the compiled vertex shader buffer
-	mTempVertexBuffer = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(vertex_list, sizeof(vertex), ARRAYSIZE(vertex_list), sbc1, ss1);
-
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	void* sbc2 = nullptr;
-	size_t ss2 = 0;
-
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PShader.hlsl", "psmain", &sbc2, &ss2);
-	mTempPixelShader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(sbc2, ss2);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	constant cc;
-	mTempConstantBuffer = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(constant));
-	// ------------------------------------------------------
+	// Player mesh
+	mPlayerMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\statue_of_liberty.obj");
+	mPlayerTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_d.jpg");
+	mPlayerNTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_n.jpg");
+	mPlayerMat = GraphicsEngine::get()->createMaterial(mBaseMat);
+	mPlayerMat->addTexture(mPlayerTex);
+	mPlayerMat->addTexture(mPlayerNTex);
+	mPlayerMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
 }
 
 void MainGame::onUpdate()
@@ -159,18 +62,45 @@ void MainGame::onUpdate()
 
 	InputSystem::get()->update();
 
-	// Clear the whole window and show a solid color
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->mSwapChain, 0, 0.3f, 0.4f, 1);
-
-	// Set viewport of render target in which we have to draw (the whole window)
-	RECT rc = this->getClientWindowRect();
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(rc.right - rc.left, rc.bottom - rc.top);
-	
 	// ------------------------------------------------------
 	// Temp - used for testing; DELETE AFTER
 	// ------------------------------------------------------
-	this->testMethod();
+
+	// Clear the whole window and show a solid color
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(
+		this->mSwapChain, 0, 0.3f, 0.4f, 1
+	);
+
+	// Set viewport of render target in which we have to draw (the whole window)
+	RECT rc = this->getClientWindowRect();
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(
+		rc.right - rc.left, rc.bottom - rc.top
+	);
+
+	// Render skybox
+	m_list_materials.clear();
+	m_list_materials.push_back(mSkyMat);
+	this->drawMesh(mSkyMesh, m_list_materials);
+
+	// Render player mesh
+	m_list_materials.clear();
+	m_list_materials.push_back(mPlayerMat);
+	this->updateModel(Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(1, 1, 1), m_list_materials);
+	this->drawMesh(mPlayerMesh, m_list_materials);
+
+	this->updateThirdPersonCamera();
+	this->updateSkyBox();
+	this->updateLight();
+
+	m_delta_mouse_x = 0;
+	m_delta_mouse_y = 0;
+
+	m_forward = 0;
+	m_rightward = 0;
+	
 	// ------------------------------------------------------
+
+	m_time += m_delta_time;
 
 	// Start swapping between the back and front buffer and present the rendered images on screen
 	this->mSwapChain->present(true);
@@ -197,7 +127,7 @@ void MainGame::onResize()
 {
 	Window::onResize();
 	RECT rc = this->getClientWindowRect();
-	mSwapChain->resize(rc.right - rc.left, rc.bottom - rc.top);
+	this->mSwapChain->resize(rc.right - rc.left, rc.bottom - rc.top);
 }
 
 void MainGame::onKeyDown(int key)
@@ -206,22 +136,22 @@ void MainGame::onKeyDown(int key)
 	{
 		case 'W':
 		{
-			mForward = 1.0f;
+			m_forward = 1.0f;
 			break;
 		}
 		case 'S':
 		{
-			mForward = -1.0f;
+			m_forward = -1.0f;
 			break;
 		}
 		case 'A':
 		{
-			mRightward = -1.0f;
+			m_rightward = -1.0f;
 			break;
 		}
 		case 'D':
 		{
-			mRightward = 1.0f;
+			m_rightward = 1.0f;
 			break;
 		}
 		default:
@@ -231,8 +161,15 @@ void MainGame::onKeyDown(int key)
 
 void MainGame::onKeyUp(int key)
 {
-	mForward = 0.0f;
-	mRightward = 0.0f;
+	m_forward = 0.0f;
+	m_rightward = 0.0f;
+
+	if (key == 'F') {
+		// Toggle fullscreen
+		mFullScreen = (mFullScreen) ? false : true;
+		RECT size_screen = this->getSizeScreen();
+		this->mSwapChain->setFullScreen(mFullScreen, size_screen.right, size_screen.bottom);
+	}
 }
 
 void MainGame::onMouseMove(const Point& mouse_pos)
@@ -242,12 +179,11 @@ void MainGame::onMouseMove(const Point& mouse_pos)
 	int width = win_size.right - win_size.left;
 	int height = win_size.bottom - win_size.top;
 
-	mRotX += (mouse_pos.m_y - (height / 2.0f)) * mDeltaTime * .3f;
-	mRotY += (mouse_pos.m_x - (width / 2.0f)) * mDeltaTime * .3f;
+	m_delta_mouse_x = (int)(mouse_pos.m_x - (int)(win_size.left + (width / 2.0f)));
+	m_delta_mouse_y = (int)(mouse_pos.m_y - (int)(win_size.top + (height / 2.0f)));
 	
 	// Keep the mouse in the center of the screen
-	//InputSystem::get()->setCursorPosition(Point(win_size.left + width / 2.0f, win_size.top + height / 2.0f));
-	InputSystem::get()->setCursorPosition(Point(width / 2.0f, height / 2.0f));
+	InputSystem::get()->setCursorPosition(Point(win_size.left + width / 2.0f, win_size.top + height / 2.0f));
 }
 
 void MainGame::onLeftMouseDown(const Point& mouse_pos)
@@ -266,67 +202,143 @@ void MainGame::onRightMouseUp(const Point& mouse_pos)
 {
 }
 
-void MainGame::testMethod()
+void MainGame::updateModel(Vec3 position, Vec3 rotation, Vec3 scale, const std::vector<MaterialPtr>& list_materials)
 {
-	/* ----- Camera and movement ----- */
-
-	Matrix4x4 tempMatrix, worldCam;
-	worldCam.setIdentity();
-
-	tempMatrix.setIdentity();
-	tempMatrix.setRotationX(mRotX);
-	worldCam *= tempMatrix;
-
-	tempMatrix.setIdentity();
-	tempMatrix.setRotationY(mRotY);
-	worldCam *= tempMatrix;
-
-	Vec3 new_pos = mWorldCam.getTranslation() + worldCam.getZDirection() * mForward * .3f;
-	new_pos = new_pos + worldCam.getXDirection() * mRightward * .3f;
-	worldCam.setTranslation(new_pos);
-	mWorldCam = worldCam;
-
-	// Make the camera matrix a view matrix by inverting it
-	worldCam.inverse();
-
 	constant cc;
-	cc.m_time = ::GetTickCount64(); // Get the time elapsed since the system was started in miliseconds
+	Matrix4x4 temp;
+
 	cc.m_world.setIdentity();
-	cc.m_view = worldCam;
 
-	LONG width = this->getClientWindowRect().right - this->getClientWindowRect().left;
-	LONG height = this->getClientWindowRect().bottom - this->getClientWindowRect().top;
+	temp.setIdentity();
+	temp.setScale(scale);
+	cc.m_world *= temp;
 
-	// 1.57f -> pi/2 -> field of view angle (it's wide)
-	cc.m_proj.setPerspectiveFovLH(1.57f, (float)width / (float)height, .1f, 100.0f);
+	temp.setIdentity();
+	temp.setRotationX(rotation.m_x);
+	cc.m_world *= temp;
 
-	/* ----- /Camera and movement ----- */
+	temp.setIdentity();
+	temp.setRotationY(rotation.m_y);
+	cc.m_world *= temp;
 
-	// Update the constant buffer with new values
-	mTempConstantBuffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &cc);
+	temp.setIdentity();
+	temp.setRotationZ(rotation.m_z);
+	cc.m_world *= temp;
 
-	// Set the new constant buffer after it's been updated (for both pixel and vertex shader)
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(mTempVertexShader, mTempConstantBuffer);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(mTempPixelShader, mTempConstantBuffer);
+	temp.setIdentity();
+	temp.setTranslation(position);
+	cc.m_world *= temp;
 
-	// Set vertex and pixel shader
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(mTempVertexShader);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(mTempPixelShader);
+	cc.m_view = mViewCam;
+	cc.m_proj = mProjCam;
+	cc.m_camera_position = mWorldCam.getTranslation();
 
-	// Set texture
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(mTempVertexShader, &mWoodTex, 1);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(mTempPixelShader, &mWoodTex, 1);
+	cc.m_light_position = mLightPosition;
+	cc.m_light_direction = mLightRotMatrix.getZDirection();
+	cc.m_time = m_time;
 
-	// Set Vertex Buffer
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mTempVertexBuffer);
+	for (size_t m = 0; m < list_materials.size(); m++)
+	{
+		list_materials[m]->setData(&cc, sizeof(constant));
+	}
+}
 
-	// Set Index Buffer
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mTempIndexBuffer);
+void MainGame::updateThirdPersonCamera()
+{
+	Matrix4x4 world_cam, temp;
+	world_cam.setIdentity();
 
-	// Draw the vertices
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(mTempIndexBuffer->getSizeIndexList(), 0, 0);
+	m_cam_rotation.m_x += m_delta_mouse_y * m_delta_time * 0.1f;
+	m_cam_rotation.m_y += m_delta_mouse_x * m_delta_time * 0.1f;
 
-	mOldDelta = mNewDelta;
-	mNewDelta = ::GetTickCount64();
-	mDeltaTime = (mOldDelta) ? (mNewDelta - mOldDelta) / 1000.0f : 0;
+	// Make the camera to not be able to do 360 degrees spin on the x axis
+	if (m_cam_rotation.m_x >= 1.57f)
+		m_cam_rotation.m_x = 1.57f;
+	else if (m_cam_rotation.m_x <= -1.57f)
+		m_cam_rotation.m_x = -1.57f;
+
+	// Smooth camera roation animation
+	//m_current_cam_rotation = Vec3::lerp(m_current_cam_rotation, m_cam_rotation, 3.0f * m_delta_time);
+	// No animation
+	m_current_cam_rotation = m_cam_rotation;
+
+	temp.setIdentity();
+	temp.setRotationX(m_current_cam_rotation.m_x);
+	world_cam *= temp;
+
+	temp.setIdentity();
+	temp.setRotationY(m_current_cam_rotation.m_y);
+	world_cam *= temp;
+
+	// Smooth camera animation
+	//m_current_cam_distance = lerp(m_current_cam_distance, m_cam_distance, 2.0f * m_delta_time);
+	// No animation
+	//m_current_cam_distance = m_cam_distance;
+
+	m_cam_position = (
+		m_cam_position + 
+		world_cam.getZDirection() * (m_forward) * 15.0f * m_delta_time + 
+		world_cam.getXDirection() * (m_rightward) * 15.0f * m_delta_time
+	);
+
+	// Used to set the camera behind the player and up a bit
+	//Vec3 new_pos = m_cam_position + world_cam.getZDirection() * (-m_current_cam_distance);
+	// Move the camera behind the player a bit on the Y axis (up)
+	//new_pos = new_pos + world_cam.getYDirection() * (1.4f);
+
+	world_cam.setTranslation(m_cam_position);
+
+	mWorldCam = world_cam;
+
+	// Make the camera matrix a view matrix -> invert it
+	world_cam.inverse();
+
+	mViewCam = world_cam;
+
+	int width = this->getClientWindowRect().right - this->getClientWindowRect().left;
+	int height = this->getClientWindowRect().bottom - this->getClientWindowRect().top;
+
+	mProjCam.setPerspectiveFovLH(1.57f, (float)((float)width / (float)height), 0.1f, 5000.0f);
+}
+
+void MainGame::updateSkyBox()
+{
+	constant cc;
+
+	cc.m_world.setIdentity();
+	cc.m_world.setScale(Vec3(4000.0f, 4000.0f, 4000.0f));
+	cc.m_world.setTranslation(mWorldCam.getTranslation());
+	cc.m_view = mViewCam;
+	cc.m_proj = mProjCam;
+
+	mSkyMat->setData(&cc, sizeof(constant));
+}
+
+void MainGame::updateLight()
+{
+	Matrix4x4 temp;
+
+	mLightRotMatrix.setIdentity();
+
+	temp.setIdentity();
+	temp.setRotationX(-0.707f);
+	mLightRotMatrix *= temp;
+
+	temp.setIdentity();
+	temp.setRotationY(-m_time * .5f);
+	mLightRotMatrix *= temp;
+}
+
+void MainGame::drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& list_materials)
+{
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());
+
+	for (size_t m = 0; m < mesh->getNumMaterialSlots(); m++)
+	{
+		if (m >= list_materials.size()) break;
+		MaterialSlot mat = mesh->getMaterialSlot(m);
+		GraphicsEngine::get()->setMaterial(list_materials[m]);
+		GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(mat.NumIndices, 0, mat.StartIndex);
+	}
 }

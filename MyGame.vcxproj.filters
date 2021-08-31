@@ -64,6 +64,12 @@
     <Filter Include="GameEngine\GraphicsEngine\ResourceManager\TextureManager">
       <UniqueIdentifier>{994021e2-741e-4857-958e-8bbdbff2c956}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameEngine\GraphicsEngine\Material">
+      <UniqueIdentifier>{93c02dc4-2b04-47ba-8f29-9ebbd188d6cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameClient\GlobalShaders\SkyBox">
+      <UniqueIdentifier>{52e42b48-2484-400d-b414-bef2ef5d81b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -122,6 +128,9 @@
     </ClCompile>
     <ClCompile Include="MeshManager.cpp">
       <Filter>GameEngine\GraphicsEngine\ResourceManager\MeshManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>GameEngine\GraphicsEngine\Material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -203,6 +212,9 @@
     <ClInclude Include="VertexMesh.h">
       <Filter>GameEngine\GraphicsEngine\ResourceManager\MeshManager</Filter>
     </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>GameEngine\GraphicsEngine\Material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexMeshLayoutShader.hlsl">
@@ -219,6 +231,12 @@
     </FxCompile>
     <FxCompile Include="DirectionalLightPS.hlsl">
       <Filter>GameClient\GlobalShaders\DirectionalLight</Filter>
+    </FxCompile>
+    <FxCompile Include="SkyBoxPS.hlsl">
+      <Filter>GameClient\GlobalShaders\SkyBox</Filter>
+    </FxCompile>
+    <FxCompile Include="SkyBoxVS.hlsl">
+      <Filter>GameClient\GlobalShaders\SkyBox</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

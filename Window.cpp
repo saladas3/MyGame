@@ -75,8 +75,16 @@ Window::Window()
 	}
 
 	// Creation of the window
-	mHwnd = ::CreateWindowEx(WS_EX_OVERLAPPEDWINDOW, L"MyWindowClass", L"DirectX Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 
-		1024, 768, nullptr, nullptr, nullptr, nullptr);
+	mHwnd = ::CreateWindowEx(
+		WS_EX_OVERLAPPEDWINDOW,
+		L"MyWindowClass",
+		L"DirectX Window",
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		1024, 768,
+		nullptr, nullptr, nullptr, nullptr
+	);
 
 	// If the creation fails throw exception
 	if (!mHwnd) {

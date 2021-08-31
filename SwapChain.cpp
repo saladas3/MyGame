@@ -45,6 +45,11 @@ SwapChain::~SwapChain()
     mSwapChain->Release();
 }
 
+// ----------------------------
+// Used to correctly render the vertices
+//  depending on the position of the camera
+// (hide pixels that are not visible even if they were rendered last?)
+// ----------------------------
 void SwapChain::reloadBuffers(UINT width, UINT height)
 {
     ID3D11Device* device = mRenderSystem->mD3DDevice;
@@ -80,17 +85,17 @@ void SwapChain::reloadBuffers(UINT width, UINT height)
     tex_desc.CPUAccessFlags = 0;
 
     hr = device->CreateTexture2D(&tex_desc, nullptr, &backBuffer);
-    if (FAILED(hr)) throw std::exception("SwapChain not created successfully");
+    if (FAILED(hr)) throw std::exception("SwapChain not created successfully in realoadBuffers()");
 
     hr = device->CreateDepthStencilView(backBuffer, nullptr, &mDsv);
-    if (FAILED(hr)) throw std::exception("SwapChain not created successfully");
+    if (FAILED(hr)) throw std::exception("SwapChain not created successfully in realoadBuffers()");
 
     backBuffer->Release();
 }
 
 void SwapChain::setFullScreen(bool fullscreen, unsigned int width, unsigned int height)
 {
-    resize(width, height);
+    this->resize(width, height);
     mSwapChain->SetFullscreenState(fullscreen, nullptr);
 }
 
@@ -99,8 +104,10 @@ void SwapChain::resize(unsigned int width, unsigned int height)
     if (mRtv) mRtv->Release();
     if (mDsv) mDsv->Release();
 
-    mSwapChain->ResizeBuffers(1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
-    reloadBuffers(width, height);
+    this->mSwapChain->ResizeBuffers(
+        1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0
+    );
+    this->reloadBuffers(width, height);
 }
 
 bool SwapChain::present(bool vsync)
