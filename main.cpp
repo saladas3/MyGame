@@ -1,5 +1,4 @@
 #include "MainGame.h"
-#include <iostream>
 
 int main() {
 	try

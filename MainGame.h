@@ -80,8 +80,12 @@ private:
 
     MeshPtr mPlayerMesh = nullptr;
     TexturePtr mPlayerTex = nullptr;
-    TexturePtr mPlayerNTex = nullptr;
     MaterialPtr mPlayerMat = nullptr;
+
+    MeshPtr mSphereMesh = nullptr;
+    TexturePtr mSphereTex = nullptr;
+    TexturePtr mSphereNTex = nullptr;
+    MaterialPtr mSphereMat = nullptr;
     
     /* --------------------------------------------------- */
 

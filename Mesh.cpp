@@ -77,7 +77,7 @@ Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
 
                 Vec3 tangent, binormal;
 
-                computeTangents(
+                this->computeTangents(
                     vertices_face[0], vertices_face[1], vertices_face[2],
                     texcoords_face[0], texcoords_face[1], texcoords_face[2],
                     tangent, binormal

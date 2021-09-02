@@ -70,6 +70,9 @@
     <Filter Include="GameClient\GlobalShaders\SkyBox">
       <UniqueIdentifier>{52e42b48-2484-400d-b414-bef2ef5d81b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameClient\GlobalShaders\DirectionalLightBumpMapping">
+      <UniqueIdentifier>{6e217557-32c8-406e-b04c-d09f67dd2682}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -237,6 +240,12 @@
     </FxCompile>
     <FxCompile Include="SkyBoxVS.hlsl">
       <Filter>GameClient\GlobalShaders\SkyBox</Filter>
+    </FxCompile>
+    <FxCompile Include="BumpMappingVS.hlsl">
+      <Filter>GameClient\GlobalShaders\DirectionalLightBumpMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="BumpMappingPS.hlsl">
+      <Filter>GameClient\GlobalShaders\DirectionalLightBumpMapping</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

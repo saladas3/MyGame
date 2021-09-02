@@ -16,6 +16,7 @@ struct constant
 	Vec4 m_light_direction;
 	Vec4 m_camera_position;
 	Vec4 m_light_position = Vec4(0, 1, 0, 0);
+	// Light radius is for point light
 	float m_light_radius = 4.0f;
 	ULONGLONG m_time = 0;
 };
@@ -47,13 +48,20 @@ void MainGame::onCreate()
 	mSkyMat->setCullMode(CULL_MODE::CULL_MODE_FRONT);
 
 	// Player mesh
-	mPlayerMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\statue_of_liberty.obj");
-	mPlayerTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_d.jpg");
-	mPlayerNTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_n.jpg");
+	mPlayerMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\player.obj");
+	mPlayerTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\sand.jpg");
 	mPlayerMat = GraphicsEngine::get()->createMaterial(mBaseMat);
 	mPlayerMat->addTexture(mPlayerTex);
-	mPlayerMat->addTexture(mPlayerNTex);
 	mPlayerMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
+
+	// BumpMapping test
+	mSphereMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
+	mSphereTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_d.jpg");
+	mSphereNTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_n.jpg");
+	mSphereMat = GraphicsEngine::get()->createMaterial(L"BumpMappingVS.hlsl", L"BumpMappingPS.hlsl");
+	mSphereMat->addTexture(mSphereTex);
+	mSphereMat->addTexture(mSphereNTex);
+	mSphereMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
 }
 
 void MainGame::onUpdate()
@@ -81,15 +89,22 @@ void MainGame::onUpdate()
 	m_list_materials.clear();
 	m_list_materials.push_back(mSkyMat);
 	this->drawMesh(mSkyMesh, m_list_materials);
+	this->updateSkyBox();
 
 	// Render player mesh
 	m_list_materials.clear();
 	m_list_materials.push_back(mPlayerMat);
-	this->updateModel(Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(1, 1, 1), m_list_materials);
 	this->drawMesh(mPlayerMesh, m_list_materials);
+	this->updateModel(Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(1, 1, 1), m_list_materials);
 
+	// Normal Mapping Render technique test
+	m_list_materials.clear();
+	m_list_materials.push_back(mSphereMat);
+	this->drawMesh(mSphereMesh, m_list_materials);
+	this->updateModel(Vec3(3, 1, 0), Vec3(0, 0, 0), Vec3(1, 1, 1), m_list_materials);
+
+	// Update camera & light
 	this->updateThirdPersonCamera();
-	this->updateSkyBox();
 	this->updateLight();
 
 	m_delta_mouse_x = 0;
@@ -288,17 +303,22 @@ void MainGame::updateThirdPersonCamera()
 
 	world_cam.setTranslation(m_cam_position);
 
-	mWorldCam = world_cam;
+	this->mWorldCam = world_cam;
 
 	// Make the camera matrix a view matrix -> invert it
 	world_cam.inverse();
 
-	mViewCam = world_cam;
+	this->mViewCam = world_cam;
 
 	int width = this->getClientWindowRect().right - this->getClientWindowRect().left;
 	int height = this->getClientWindowRect().bottom - this->getClientWindowRect().top;
 
-	mProjCam.setPerspectiveFovLH(1.57f, (float)((float)width / (float)height), 0.1f, 5000.0f);
+	this->mProjCam.setPerspectiveFovLH(
+		1.57f,
+		(float)((float)width / (float)height),
+		0.1f,
+		5000.0f
+	);
 }
 
 void MainGame::updateSkyBox()

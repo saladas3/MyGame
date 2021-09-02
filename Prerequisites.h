@@ -11,6 +11,9 @@
 #include <string>
 #include <vector>
 
+// For DEBUG
+#include <iostream>
+
 
 class GraphicsEngine;
 class RenderSystem;
