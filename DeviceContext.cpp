@@ -45,10 +45,26 @@ void DeviceContext::drawTriangleStrip(UINT vertex_count, UINT start_vertex_index
 
 void DeviceContext::clearRenderTargetColor(const TexturePtr& render_target, float red, float green, float blue, float alpha)
 {
+	if (render_target->mType != Texture::Type::RenderTarget) return;
+	FLOAT clear_color[] = { red, green, blue, alpha };
+	mDeviceContext->ClearRenderTargetView(render_target->mRenderTargetView, clear_color);
 }
 
 void DeviceContext::clearDepthStencil(const TexturePtr& depth_stencil)
 {
+	if (depth_stencil->mType != Texture::Type::DepthStencil) return;
+	mDeviceContext->ClearDepthStencilView(depth_stencil->mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+}
+
+void DeviceContext::setRenderTarget(const TexturePtr& render_target, const TexturePtr& depth_stencil)
+{
+	if (render_target->mType != Texture::Type::RenderTarget) return;
+	if (depth_stencil->mType != Texture::Type::DepthStencil) return;
+	mDeviceContext->OMSetRenderTargets(
+		1,
+		&render_target->mRenderTargetView,
+		depth_stencil->mDepthStencilView
+	);
 }
 
 void DeviceContext::setVertexBuffer(const VertexBufferPtr& vertex_buffer)

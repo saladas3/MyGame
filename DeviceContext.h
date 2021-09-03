@@ -26,6 +26,8 @@ public:
 
 	void clearRenderTargetColor(const TexturePtr& render_target, float red, float green, float blue, float alpha);
 	void clearDepthStencil(const TexturePtr& depth_stencil);
+
+	void setRenderTarget(const TexturePtr& render_target, const TexturePtr& depth_stencil);
 	
 	void setVertexBuffer(const VertexBufferPtr& vertex_buffer);
 	

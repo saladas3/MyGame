@@ -4,9 +4,21 @@
 Texture::Texture(const wchar_t* full_path) : Resource(full_path)
 {
 	DirectX::ScratchImage image_data;
-	HRESULT res = DirectX::LoadFromWICFile(
-		full_path, DirectX::WIC_FLAGS_IGNORE_SRGB, nullptr, image_data
-	);
+
+	std::filesystem::path filesystem_path = (std::filesystem::path)full_path;
+
+	HRESULT res = 0;
+	if (filesystem_path.extension() == ".tga") {
+		//DirectX::TexMetadata tga_tex_meta;
+		res = DirectX::LoadFromTGAFile(
+			full_path, nullptr, image_data
+		);
+	}
+	else {
+		res = DirectX::LoadFromWICFile(
+			full_path, DirectX::WIC_FLAGS_IGNORE_SRGB, nullptr, image_data
+		);
+	}
 
 	if (SUCCEEDED(res))
 	{
@@ -62,6 +74,8 @@ Texture::Texture(const Rect& size, Texture::Type type) : Resource(L"")
 	}
 	else if (type == Texture::Type::RenderTarget) {
 		tex_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		// For the render target we need to also set a shader resource flag 
+		//	-> it allows to use the texture inside shaders
 		tex_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	}
 	else if (type == Texture::Type::DepthStencil) {
@@ -88,23 +102,21 @@ Texture::Texture(const Rect& size, Texture::Type type) : Resource(L"")
 		);
 		if (FAILED(hr)) throw std::exception("Texture was not created successfully");
 	}
-
+	
 	if (type == Texture::Type::RenderTarget) {
 		hr = GraphicsEngine::get()->getRenderSystem()->mD3DDevice->CreateRenderTargetView(
 			mTexture, NULL, &mRenderTargetView
 		);
 		if (FAILED(hr)) throw std::exception("Texture was not created successfully");
-	}
-
-	else if (type == Texture::Type::DepthStencil) {
+	} else if (type == Texture::Type::DepthStencil) {
 		hr = GraphicsEngine::get()->getRenderSystem()->mD3DDevice->CreateDepthStencilView(
 			mTexture, NULL, &mDepthStencilView
 		);
 		if (FAILED(hr)) throw std::exception("Texture was not created successfully");
 	}
 
-	mType = type;
-	mSize = size;
+	this->mType = type;
+	this->mSize = size;
 }
 
 Texture::~Texture()

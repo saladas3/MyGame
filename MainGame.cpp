@@ -117,6 +117,16 @@ void MainGame::onUpdate()
 
 	m_time += m_delta_time;
 
+	int width = this->getClientWindowRect().right - this->getClientWindowRect().left;
+	int height = this->getClientWindowRect().bottom - this->getClientWindowRect().top;
+
+	this->mProjCam.setPerspectiveFovLH(
+		1.57f,
+		(float)((float)width / (float)height),
+		0.1f,
+		5000.0f
+	);
+
 	// Start swapping between the back and front buffer and present the rendered images on screen
 	this->mSwapChain->present(true);
 }
@@ -309,16 +319,6 @@ void MainGame::updateThirdPersonCamera()
 	world_cam.inverse();
 
 	this->mViewCam = world_cam;
-
-	int width = this->getClientWindowRect().right - this->getClientWindowRect().left;
-	int height = this->getClientWindowRect().bottom - this->getClientWindowRect().top;
-
-	this->mProjCam.setPerspectiveFovLH(
-		1.57f,
-		(float)((float)width / (float)height),
-		0.1f,
-		5000.0f
-	);
 }
 
 void MainGame::updateSkyBox()
