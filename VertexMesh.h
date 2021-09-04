@@ -31,7 +31,7 @@ public:
 		mNormal(vertex.mNormal),
 		mTangent(vertex.mTangent),
 		mBinormal(vertex.mBinormal) { }
-	~VertexMesh() {}
+	~VertexMesh() = default;
 
 public:
 	Vec3 mPosition;

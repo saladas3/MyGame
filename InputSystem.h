@@ -27,8 +27,8 @@ public:
 private:
     std::unordered_set<InputListener*> mSetListeners;
 
-    unsigned char mKeysState[256] = {};
-    unsigned char mOldKeysState[256] = {};
+    short mKeysState[256] = {};
+    short mOldKeysState[256] = {};
 
     Point mOldMousePos;
     bool mFirstTime = true;

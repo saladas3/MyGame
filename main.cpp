@@ -1,5 +1,6 @@
 //#include "MainGame.h"
-#include "FrameBufferDemo.h"
+//#include "FrameBufferDemo.h"
+#include "PostProcessingDemo.h"
 
 int main() {
 	try
@@ -14,7 +15,7 @@ int main() {
 
 	try
 	{
-		FrameBufferDemo app;
+		PostProcessingDemo app;
 		while (app.isRunning());
 	}
 	catch (const std::exception& ex) {

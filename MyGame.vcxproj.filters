@@ -76,6 +76,12 @@
     <Filter Include="GameClient\FrameBufferDemo">
       <UniqueIdentifier>{3361929c-e530-4e8e-804f-ddc887511fc2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameClient\PostProcessingDemo">
+      <UniqueIdentifier>{315b1dac-50db-4df2-8500-9c7eb241b9ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameClient\GlobalShaders\PostProcessingShaders">
+      <UniqueIdentifier>{01493d0e-c2f7-4cf3-9f45-3855ce1b225b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -143,6 +149,9 @@
     </ClCompile>
     <ClCompile Include="MiniGame.cpp">
       <Filter>GameClient\FrameBufferDemo</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessingDemo.cpp">
+      <Filter>GameClient\PostProcessingDemo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -233,6 +242,9 @@
     <ClInclude Include="MiniGame.h">
       <Filter>GameClient\FrameBufferDemo</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcessingDemo.h">
+      <Filter>GameClient\PostProcessingDemo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexMeshLayoutShader.hlsl">
@@ -261,6 +273,12 @@
     </FxCompile>
     <FxCompile Include="BumpMappingPS.hlsl">
       <Filter>GameClient\GlobalShaders\DirectionalLightBumpMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="PostProcessVS.hlsl">
+      <Filter>GameClient\GlobalShaders\PostProcessingShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="DistortionEffectPS.hlsl">
+      <Filter>GameClient\GlobalShaders\PostProcessingShaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

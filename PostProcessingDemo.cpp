@@ -1,8 +1,12 @@
-#include "MainGame.h"
+#include "PostProcessingDemo.h"
 
-MainGame::MainGame() = default;
+// NOTE - By rendering the game not on the screen but on a quad that covers the screen leaves room to apply any kind of effects (ex: distortion)
 
-MainGame::~MainGame() = default;
+PostProcessingDemo::PostProcessingDemo() = default;
+
+PostProcessingDemo::~PostProcessingDemo() = default;
+
+// NOTE - To send data from the constant buffer to the pixel shader where the effects are created we must use: mPostProcessMat.setData(<new_c_buffer>)
 
 // Structure created to be passed through the constant buffer
 // DirectX handles the constant data in video memory in chunks of 16B
@@ -21,7 +25,7 @@ struct constant
 	ULONGLONG m_time = 0;
 };
 
-void MainGame::onCreate()
+void PostProcessingDemo::onCreate()
 {
 	Window::onCreate();
 
@@ -63,6 +67,43 @@ void MainGame::onCreate()
 	mSphereMat->addTexture(mSphereNTex);
 	mSphereMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
 
+	// Base material - to hold the directional light property for most meshes
+	mPostProcessMat = GraphicsEngine::get()->createMaterial(
+		L"PostProcessVS.hlsl", L"DistortionEffectPS.hlsl"
+	);
+	mPostProcessMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
+
+	VertexMesh quad_vertex_list[] = {
+		VertexMesh(
+			Vec3(-1, -1, 0), Vec2(0, 1), Vec3(), Vec3(), Vec3()
+		),
+		VertexMesh(
+			Vec3(-1,  1, 0), Vec2(0, 0), Vec3(), Vec3(), Vec3()
+		),
+		VertexMesh(
+			Vec3( 1,  1, 0), Vec2(1, 0), Vec3(), Vec3(), Vec3()
+		),
+		VertexMesh(
+			Vec3( 1, -1, 0), Vec2(1, 1), Vec3(), Vec3(), Vec3()
+		),
+	};
+
+	UINT quad_index_list[] = {
+		0, 1, 2,
+		2, 3, 0,
+	};
+
+	MaterialSlot quad_mat_slots[] = {
+		{0, 6, 0}
+	};
+
+	// Create the quad in which we render the game
+	this->mQuadMesh = GraphicsEngine::get()->getMeshManager()->createMesh(
+		quad_vertex_list, 4,
+		quad_index_list, 6,
+		quad_mat_slots, 1
+	);
+
 	int width = rc.right - rc.left;
 	int height = rc.bottom - rc.top;
 
@@ -74,27 +115,42 @@ void MainGame::onCreate()
 	);
 
 	m_list_materials.reserve(32);
+
+	mRenderTarget = GraphicsEngine::get()->getTextureManager()->createTexture(
+		Rect(rc.right - rc.left, rc.bottom - rc.top), Texture::Type::RenderTarget
+	);
+	mDepthStencil = GraphicsEngine::get()->getTextureManager()->createTexture(
+		Rect(rc.right - rc.left, rc.bottom - rc.top), Texture::Type::DepthStencil
+	);
+
+	mPostProcessMat->addTexture(mRenderTarget);
 }
 
-void MainGame::onUpdate()
+void PostProcessingDemo::onUpdate()
 {
 	Window::onUpdate();
 
 	InputSystem::get()->update();
 
-	// ------------------------------------------------------
-	// Temp - used for testing; DELETE AFTER
-	// ------------------------------------------------------
+	// ------------------------------------------------
+	// SCENE RENDERED TO RENDER TARGET
+	// ------------------------------------------------
 
 	// Clear the whole window and show a solid color
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(
-		this->mSwapChain, 0, 0.3f, 0.4f, 1
+		this->mRenderTarget, 0, 0.3f, 0.4f, 1
+	);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearDepthStencil(
+		this->mDepthStencil
+	);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setRenderTarget(
+		this->mRenderTarget, this->mDepthStencil
 	);
 
 	// Set viewport of render target in which we have to draw (the whole window)
-	RECT rc = this->getClientWindowRect();
+	Rect viewport_size = mRenderTarget->getSize();
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(
-		rc.right - rc.left, rc.bottom - rc.top
+		viewport_size.width, viewport_size.height
 	);
 
 	// Render skybox
@@ -115,6 +171,8 @@ void MainGame::onUpdate()
 	this->drawMesh(mSphereMesh, m_list_materials);
 	this->updateModel(Vec3(3, 1, 0), Vec3(0, 0, 0), Vec3(1, 1, 1), m_list_materials);
 
+	// ------------------------------------------------
+
 	// Update camera & light
 	this->updateThirdPersonCamera();
 	this->updateLight();
@@ -124,69 +182,92 @@ void MainGame::onUpdate()
 
 	m_forward = 0;
 	m_rightward = 0;
-	
-	// ------------------------------------------------------
 
 	m_time += m_delta_time;
+
+	// Clear the whole window and show a solid color
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(
+		this->mSwapChain, 0, 0.3f, 0.4f, 1
+	);
+
+	// Set viewport of render target in which we have to draw (the whole window)
+	RECT rc = this->getClientWindowRect();
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(
+		rc.right - rc.left, rc.bottom - rc.top
+	);
+
+	m_list_materials.clear();
+	m_list_materials.push_back(mPostProcessMat);
+	this->drawMesh(mQuadMesh, m_list_materials);
 
 	// Start swapping between the back and front buffer and present the rendered images on screen
 	this->mSwapChain->present(true);
 }
 
-void MainGame::onDestroy()
+void PostProcessingDemo::onDestroy()
 {
 	Window::onDestroy();
 }
 
-void MainGame::onFocus()
+void PostProcessingDemo::onFocus()
 {
 	Window::onFocus();
 	InputSystem::get()->addListener(this);
 }
 
-void MainGame::onKillFocus()
+void PostProcessingDemo::onKillFocus()
 {
 	Window::onKillFocus();
 	InputSystem::get()->removeListener(this);
 }
 
-void MainGame::onResize()
+void PostProcessingDemo::onResize()
 {
 	Window::onResize();
 	RECT rc = this->getClientWindowRect();
 	this->mSwapChain->resize(rc.right - rc.left, rc.bottom - rc.top);
+
+	mRenderTarget = GraphicsEngine::get()->getTextureManager()->createTexture(
+		Rect(rc.right - rc.left, rc.bottom - rc.top), Texture::Type::RenderTarget
+	);
+	mDepthStencil = GraphicsEngine::get()->getTextureManager()->createTexture(
+		Rect(rc.right - rc.left, rc.bottom - rc.top), Texture::Type::DepthStencil
+	);
+
+	mPostProcessMat->removeTexture(0);
+	mPostProcessMat->addTexture(mRenderTarget);
 }
 
-void MainGame::onKeyDown(int key)
+void PostProcessingDemo::onKeyDown(int key)
 {
 	switch (key)
 	{
-		case 'W':
-		{
-			m_forward = 1.0f;
-			break;
-		}
-		case 'S':
-		{
-			m_forward = -1.0f;
-			break;
-		}
-		case 'A':
-		{
-			m_rightward = -1.0f;
-			break;
-		}
-		case 'D':
-		{
-			m_rightward = 1.0f;
-			break;
-		}
-		default:
-			break;
+	case 'W':
+	{
+		m_forward = 1.0f;
+		break;
+	}
+	case 'S':
+	{
+		m_forward = -1.0f;
+		break;
+	}
+	case 'A':
+	{
+		m_rightward = -1.0f;
+		break;
+	}
+	case 'D':
+	{
+		m_rightward = 1.0f;
+		break;
+	}
+	default:
+		break;
 	}
 }
 
-void MainGame::onKeyUp(int key)
+void PostProcessingDemo::onKeyUp(int key)
 {
 	m_forward = 0.0f;
 	m_rightward = 0.0f;
@@ -199,7 +280,7 @@ void MainGame::onKeyUp(int key)
 	}
 }
 
-void MainGame::onMouseMove(const Point& mouse_pos)
+void PostProcessingDemo::onMouseMove(const Point & mouse_pos)
 {
 	RECT win_size = this->getClientWindowRect();
 
@@ -208,28 +289,28 @@ void MainGame::onMouseMove(const Point& mouse_pos)
 
 	m_delta_mouse_x = (int)(mouse_pos.m_x - (int)(win_size.left + (width / 2.0f)));
 	m_delta_mouse_y = (int)(mouse_pos.m_y - (int)(win_size.top + (height / 2.0f)));
-	
+
 	// Keep the mouse in the center of the screen
 	InputSystem::get()->setCursorPosition(Point(win_size.left + width / 2.0f, win_size.top + height / 2.0f));
 }
 
-void MainGame::onLeftMouseDown(const Point& mouse_pos)
+void PostProcessingDemo::onLeftMouseDown(const Point & mouse_pos)
 {
 }
 
-void MainGame::onLeftMouseUp(const Point& mouse_pos)
+void PostProcessingDemo::onLeftMouseUp(const Point & mouse_pos)
 {
 }
 
-void MainGame::onRightMouseDown(const Point& mouse_pos)
+void PostProcessingDemo::onRightMouseDown(const Point & mouse_pos)
 {
 }
 
-void MainGame::onRightMouseUp(const Point& mouse_pos)
+void PostProcessingDemo::onRightMouseUp(const Point & mouse_pos)
 {
 }
 
-void MainGame::updateModel(Vec3 position, Vec3 rotation, Vec3 scale, const std::vector<MaterialPtr>& list_materials)
+void PostProcessingDemo::updateModel(Vec3 position, Vec3 rotation, Vec3 scale, const std::vector<MaterialPtr>&list_materials)
 {
 	constant cc;
 	Matrix4x4 temp;
@@ -270,7 +351,7 @@ void MainGame::updateModel(Vec3 position, Vec3 rotation, Vec3 scale, const std::
 	}
 }
 
-void MainGame::updateThirdPersonCamera()
+void PostProcessingDemo::updateThirdPersonCamera()
 {
 	Matrix4x4 world_cam, temp;
 	world_cam.setIdentity();
@@ -303,10 +384,10 @@ void MainGame::updateThirdPersonCamera()
 	//m_current_cam_distance = m_cam_distance;
 
 	m_cam_position = (
-		m_cam_position + 
-		world_cam.getZDirection() * (m_forward) * 15.0f * m_delta_time + 
+		m_cam_position +
+		world_cam.getZDirection() * (m_forward) * 15.0f * m_delta_time +
 		world_cam.getXDirection() * (m_rightward) * 15.0f * m_delta_time
-	);
+		);
 
 	// Used to set the camera behind the player and up a bit
 	//Vec3 new_pos = m_cam_position + world_cam.getZDirection() * (-m_current_cam_distance);
@@ -323,7 +404,7 @@ void MainGame::updateThirdPersonCamera()
 	this->mViewCam = world_cam;
 }
 
-void MainGame::updateSkyBox()
+void PostProcessingDemo::updateSkyBox()
 {
 	constant cc;
 
@@ -336,7 +417,7 @@ void MainGame::updateSkyBox()
 	mSkyMat->setData(&cc, sizeof(constant));
 }
 
-void MainGame::updateLight()
+void PostProcessingDemo::updateLight()
 {
 	Matrix4x4 temp;
 
@@ -351,7 +432,7 @@ void MainGame::updateLight()
 	mLightRotMatrix *= temp;
 }
 
-void MainGame::drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& list_materials)
+void PostProcessingDemo::drawMesh(const MeshPtr & mesh, const std::vector<MaterialPtr>&list_materials)
 {
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());

@@ -77,7 +77,6 @@ void MiniGame::onUpdate()
 	);
 
 	// Set viewport of render target in which we have to draw (the whole window)
-	//RECT rc = this->getClientWindowRect();
 	Rect viewport_size = mRenderTarget->getSize();
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setViewportSize(
 		viewport_size.width, viewport_size.height

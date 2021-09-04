@@ -36,11 +36,34 @@ void InputSystem::update()
 
 	mOldMousePos = Point(current_mouse_pos.x, current_mouse_pos.y);
 
-	if (::GetKeyboardState(mKeysState))
+	for (int i = 0; i < 256; i++)
 	{
-		for (int i = 0; i < 256; i++)
+		mKeysState[i] = ::GetAsyncKeyState(i);
+		if (mKeysState[i] & 0x8001) // KEY IS DOWN
 		{
-			if (mKeysState[i] & 0x80) // KEY IS DOWN
+			auto it = mSetListeners.begin();
+
+			while (it != mSetListeners.end())
+			{
+				if (i == VK_LBUTTON)
+				{
+					if (mKeysState[i] != mOldKeysState[i])
+						(*it)->onLeftMouseDown(Point(current_mouse_pos.x, current_mouse_pos.y));
+				}
+				else if (i == VK_RBUTTON)
+				{
+					if (mKeysState[i] != mOldKeysState[i])
+						(*it)->onRightMouseDown(Point(current_mouse_pos.x, current_mouse_pos.y));
+				}
+				else
+					(*it)->onKeyDown(i);
+
+				++it;
+			}
+		}
+		else // KEY IS UP
+		{
+			if (mKeysState[i] != mOldKeysState[i])
 			{
 				auto it = mSetListeners.begin();
 
@@ -49,48 +72,23 @@ void InputSystem::update()
 					if (i == VK_LBUTTON)
 					{
 						if (mKeysState[i] != mOldKeysState[i])
-							(*it)->onLeftMouseDown(Point(current_mouse_pos.x, current_mouse_pos.y));
+							(*it)->onLeftMouseUp(Point(current_mouse_pos.x, current_mouse_pos.y));
 					}
 					else if (i == VK_RBUTTON)
 					{
 						if (mKeysState[i] != mOldKeysState[i])
-							(*it)->onRightMouseDown(Point(current_mouse_pos.x, current_mouse_pos.y));
+							(*it)->onRightMouseUp(Point(current_mouse_pos.x, current_mouse_pos.y));
 					}
 					else
-						(*it)->onKeyDown(i);
-
+						(*it)->onKeyUp(i);
 					++it;
 				}
 			}
-			else // KEY IS UP
-			{
-				if (mKeysState[i] != mOldKeysState[i])
-				{
-					auto it = mSetListeners.begin();
-
-					while (it != mSetListeners.end())
-					{
-						if (i == VK_LBUTTON)
-						{
-							if (mKeysState[i] != mOldKeysState[i])
-								(*it)->onLeftMouseUp(Point(current_mouse_pos.x, current_mouse_pos.y));
-						}
-						else if (i == VK_RBUTTON)
-						{
-							if (mKeysState[i] != mOldKeysState[i])
-								(*it)->onRightMouseUp(Point(current_mouse_pos.x, current_mouse_pos.y));
-						}
-						else
-							(*it)->onKeyUp(i);
-						++it;
-					}
-				}
-			}
-
 		}
-		// Store current keys state to old keys state buffer
-		::memcpy(mOldKeysState, mKeysState, sizeof(unsigned char) * 256);
+
 	}
+	// Store current keys state to old keys state buffer
+	::memcpy(mOldKeysState, mKeysState, sizeof(short) * 256);
 }
 
 void InputSystem::addListener(InputListener* listener)

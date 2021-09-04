@@ -159,15 +159,18 @@ Mesh::Mesh(
     void* shader_byte_code = nullptr;
     size_t size_shader = 0;
 
-    // mRadius = this->boundingSphereRadius(list_vertices);
-
     GraphicsEngine::get()->getVertexMeshLayoutShaderByteCodeAndSize(&shader_byte_code, &size_shader);
-    mVertexBuffer = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(vertex_list_data, sizeof(VertexMesh),
+    mVertexBuffer = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(
+        vertex_list_data,
+        sizeof(VertexMesh),
         (UINT)vertex_list_size,
         shader_byte_code,
-        (UINT)size_shader);
-    mIndexBuffer = GraphicsEngine::get()->getRenderSystem()->createIndexBuffer(index_list_data,
-        (UINT)index_list_size);
+        (UINT)size_shader
+    );
+    mIndexBuffer = GraphicsEngine::get()->getRenderSystem()->createIndexBuffer(
+        index_list_data,
+        (UINT)index_list_size
+    );
 
     mMaterialSlots.resize(material_slot_list_size);
 
