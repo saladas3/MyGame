@@ -41,7 +41,7 @@ void FrameBufferDemo::onCreate()
 	mBaseMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
 
 	// Sky mesh
-	mSkyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere_hq.obj");
+	mSkyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
 	mSkyTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\sky.jpg");
 	mSkyMat = GraphicsEngine::get()->createMaterial(L"SkyBoxVS.hlsl", L"SkyBoxPS.hlsl");
 	mSkyMat->addTexture(mSkyTex);

@@ -1,12 +1,12 @@
 #include "PostProcessingDemo.h"
 
-// NOTE - By rendering the game not on the screen but on a quad that covers the screen leaves room to apply any kind of effects (ex: distortion)
+// NOTE(luca) - By rendering the game not on the screen but on a quad that covers the screen leaves room to apply any kind of effects (ex: distortion)
 
 PostProcessingDemo::PostProcessingDemo() = default;
 
 PostProcessingDemo::~PostProcessingDemo() = default;
 
-// NOTE - To send data from the constant buffer to the pixel shader where the effects are created we must use: mPostProcessMat.setData(<new_c_buffer>)
+// NOTE(luca) - To send data from the constant buffer to the pixel shader where the effects are created we must use: mPostProcessMat.setData(<new_c_buffer>)
 
 // Structure created to be passed through the constant buffer
 // DirectX handles the constant data in video memory in chunks of 16B
@@ -45,7 +45,7 @@ void PostProcessingDemo::onCreate()
 	mBaseMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
 
 	// Sky mesh
-	mSkyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere_hq.obj");
+	mSkyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
 	mSkyTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
 	mSkyMat = GraphicsEngine::get()->createMaterial(L"SkyBoxVS.hlsl", L"SkyBoxPS.hlsl");
 	mSkyMat->addTexture(mSkyTex);

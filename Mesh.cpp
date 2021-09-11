@@ -1,8 +1,13 @@
 #include "Mesh.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
+#define TINYGLTF_IMPLEMENTATION
+#define STBI_MSC_SECURE_CRT
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include <tiny_obj_loader.h>
+#include <tiny_gltf.h>
 
 Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
 {
@@ -10,18 +15,30 @@ Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
 
-    std::string warn;
-    std::string err;
-
     std::wstring input_file_temp(full_path);
-    std::string input_file(input_file_temp.begin(), input_file_temp.end());
+    std::string input_file(input_file_temp.begin(), input_file_temp.end()), warn, err;
+    std::filesystem::path filesystem_path = (std::filesystem::path)full_path;
 
-    std::string mtldir = input_file.substr(0, input_file.find_last_of("\\/"));
-
-    // Read the 3D Model from an '.obj' file
-    bool res = tinyobj::LoadObj(&attribs, &shapes, &materials, &warn, &err, input_file.c_str(), mtldir.c_str());
-
-    if (!err.empty() || !res) throw std::exception("Could not read from file or Mesh not created.");
+    bool res = FALSE;
+    if (filesystem_path.extension() == ".gltf" || filesystem_path.extension() == ".glb") {
+        tinygltf::TinyGLTF loader;
+        tinygltf::Model model;
+        // Read the 3D model from a '.gltf' / '.glb' file
+        res = loader.LoadASCIIFromFile(&model, &err, &warn, input_file);
+        const tinygltf::Scene& scene = model.scenes[model.defaultScene];
+        for (size_t i = 0; i < scene.nodes.size(); ++i) {
+            
+        }
+    }
+    else if (filesystem_path.extension() == ".obj") {
+        std::string mtldir = input_file.substr(0, input_file.find_last_of("\\/"));
+        // Read the 3D Model from an '.obj' file
+        res = tinyobj::LoadObj(&attribs, &shapes, &materials, &warn, &err, input_file.c_str(), mtldir.c_str());
+        if (!err.empty() || !res) throw std::exception("Could not read Mesh from .obj file.");
+#if _DEBUG
+        if (warn != "") std::cout << "TINYOBJ WAR: " << warn << std::endl;
+#endif
+    }
 
     std::vector<VertexMesh> list_vertices;
     std::vector<unsigned int> list_indices;
@@ -39,7 +56,7 @@ Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
 
     size_t index_global_offset = 0;
 
-    // Save the data in the '.obj' file
+    // Save the data from the '.obj' file
     for (size_t m = 0; m < materials.size(); m++) {
         mMaterialSlots[m].StartIndex = index_global_offset;
         mMaterialSlots[m].MaterialId = m;
@@ -108,8 +125,11 @@ Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
                     v_tangent = Vec3::cross(v_binormal, Vec3(nx, ny, nz));
 
                     VertexMesh vertex(
-                        Vec3(vx, vy, vz), Vec2(tx, ty), Vec3(nx, ny, nz),
-                        v_tangent, v_binormal
+                        Vec3(vx, vy, vz),  // position
+                        Vec2(tx, ty),      // texcoord
+                        Vec3(nx, ny, nz),  // normal
+                        v_tangent,
+                        v_binormal
                     );
 
                     list_vertices.push_back(vertex);
