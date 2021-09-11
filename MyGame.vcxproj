@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>Libs\DirectXTex\include;Libs\tinyobjloader\include;$(IncludePath)</IncludePath>
+    <IncludePath>Libs\DirectXTex\include;Libs\tinyobjloader\include;Libs\tinygltf-2.5.0;$(IncludePath)</IncludePath>
     <LibraryPath>Libs\DirectXTex\bin;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
