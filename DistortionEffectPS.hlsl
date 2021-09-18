@@ -7,7 +7,6 @@ struct PS_INPUT
 	float2 texcoord: TEXCOORD0;
 };
 
-// Function
 float2 distort(float2 p)
 {
 	// atan2 - used to convert carthesian coordinates to polar coordinates 
@@ -23,6 +22,7 @@ float2 distort(float2 p)
 	p.x = radius * cos(theta);
 	p.y = radius * sin(theta);
 
+	// sin and cos will return a value in [-1, 1]
 	// Convert the range from [-1, 1] to [0, 1] ([-1, 1] + 1 / 2)
 	return 0.5 * (p + 1.0);
 }
@@ -32,6 +32,7 @@ float4 psmain(PS_INPUT input) : SV_TARGET
 	float2 xy = 2.0 * input.texcoord.xy - 1.0;
 	float2 uv;
 
+	// Diameter?Radius? of the circle in which we create the effect
 	float d = length(xy);
 
 	if (d < 1.0) {
@@ -43,5 +44,7 @@ float4 psmain(PS_INPUT input) : SV_TARGET
 		uv = input.texcoord.xy;
 	}
 	
-	return Texture.Sample(TextureSampler, uv);
+	// Pass the 'uv' variable created above in the texture sampler below
+	//  instead of 'input.texcoord.xy' in order to create the effect.
+	return Texture.Sample(TextureSampler, input.texcoord.xy);
 }

@@ -52,7 +52,7 @@ void PostProcessingDemo::onCreate()
 	mSkyMat->setCullMode(CULL_MODE::CULL_MODE_FRONT);
 
 	// Player mesh
-	mPlayerMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\player.obj");
+	mPlayerMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\player.gltf");
 	mPlayerTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\sand.jpg");
 	mPlayerMat = GraphicsEngine::get()->createMaterial(mBaseMat);
 	mPlayerMat->addTexture(mPlayerTex);

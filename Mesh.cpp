@@ -9,6 +9,13 @@
 #include <tiny_obj_loader.h>
 #include <tiny_gltf.h>
 
+float ucharToFloat(UCHAR a, UCHAR b, UCHAR c, UCHAR d) {
+    float f;
+    UCHAR c_arr[] = { a, b, c, d };
+    memcpy(&f, &c_arr, sizeof(f));
+    return f;
+}
+
 Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
 {
     tinyobj::attrib_t attribs;
@@ -19,135 +26,218 @@ Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
     std::string input_file(input_file_temp.begin(), input_file_temp.end()), warn, err;
     std::filesystem::path filesystem_path = (std::filesystem::path)full_path;
 
+    std::vector<VertexMesh> list_vertices;
+    std::vector<unsigned int> list_indices;
+
     bool res = FALSE;
     if (filesystem_path.extension() == ".gltf" || filesystem_path.extension() == ".glb") {
         tinygltf::TinyGLTF loader;
         tinygltf::Model model;
-        // Read the 3D model from a '.gltf' / '.glb' file
-        res = loader.LoadASCIIFromFile(&model, &err, &warn, input_file);
-        const tinygltf::Scene& scene = model.scenes[model.defaultScene];
-        for (size_t i = 0; i < scene.nodes.size(); ++i) {
-            
+        if (filesystem_path.extension() == ".gltf") {
+            // Read the 3D model from a '.gltf' file
+            res = loader.LoadASCIIFromFile(&model, &err, &warn, input_file);
         }
+        else {
+            // Read the 3D model from a '.glb' file
+            res = loader.LoadBinaryFromFile(&model, &err, &warn, input_file);
+        }
+        if (!res) throw std::exception("Could not read Mesh from gltf file.");
+
+        UINT pos_index = 0, normal_index = 0, index_global_offset = 0;
+        for (size_t i = 0; i < model.meshes.size(); i++) {
+            for (size_t j = 0; j < model.meshes[i].primitives.size(); j++) {
+                tinygltf::Primitive primitive = model.meshes[i].primitives[j];
+                int pos_index = primitive.attributes["POSITION"];
+                int normal_index = primitive.attributes["NORMAL"];
+                
+                tinygltf::Accessor pos_accessor = model.accessors[pos_index];
+                tinygltf::Accessor normal_accessor = model.accessors[normal_index];
+
+                tinygltf::BufferView buffer_view_pos = model.bufferViews[pos_accessor.bufferView];
+                tinygltf::BufferView buffer_view_normal = model.bufferViews[normal_accessor.bufferView];
+                for (size_t k = 0; k < buffer_view_pos.byteLength; k+=12) {
+                    float vx = ucharToFloat(
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k],
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 1],
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 2],
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 3]
+                    );
+                    float vy = ucharToFloat(
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 4],
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 5],
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 6],
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 7]
+                    );
+                    float vz = ucharToFloat(
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 8],
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 9],
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 10],
+                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 11]
+                    );
+
+                    float nx = ucharToFloat(
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k],
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 1],
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 2],
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 3]
+                    );
+                    float ny = ucharToFloat(
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 4],
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 5],
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 6],
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 7]
+                    );
+                    float nz = ucharToFloat(
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 8],
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 9],
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 10],
+                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 11]
+                    );
+
+                    VertexMesh vertex(
+                        Vec3(vx, vy, vz),  // position
+                        Vec2(),      // texcoord
+                        Vec3(nx, ny, nz),  // normal
+                        Vec3(),
+                        Vec3()
+                    );
+
+                    list_vertices.push_back(vertex);
+                    list_indices.push_back(++index_global_offset);
+                }
+            }
+        }
+        MaterialSlot x;
+        x.StartIndex = 0;
+        x.MaterialId = 0;
+        x.NumIndices = 366;
+        mMaterialSlots.push_back(x);
     }
     else if (filesystem_path.extension() == ".obj") {
         std::string mtldir = input_file.substr(0, input_file.find_last_of("\\/"));
         // Read the 3D Model from an '.obj' file
-        res = tinyobj::LoadObj(&attribs, &shapes, &materials, &warn, &err, input_file.c_str(), mtldir.c_str());
-        if (!err.empty() || !res) throw std::exception("Could not read Mesh from .obj file.");
-#if _DEBUG
-        if (warn != "") std::cout << "TINYOBJ WAR: " << warn << std::endl;
-#endif
-    }
-
-    std::vector<VertexMesh> list_vertices;
-    std::vector<unsigned int> list_indices;
-
-    size_t size_vertex_index_lists = 0;
-
-    for (auto& shape : shapes) {
-        size_vertex_index_lists += shape.mesh.indices.size();
-    }
-
-    list_vertices.reserve(size_vertex_index_lists);
-    list_indices.reserve(size_vertex_index_lists);
-
-    mMaterialSlots.resize(materials.size());
-
-    size_t index_global_offset = 0;
-
-    // Save the data from the '.obj' file
-    for (size_t m = 0; m < materials.size(); m++) {
-        mMaterialSlots[m].StartIndex = index_global_offset;
-        mMaterialSlots[m].MaterialId = m;
-
+        res = tinyobj::LoadObj(
+            &attribs,
+            &shapes,
+            &materials,
+            &warn,
+            &err,
+            input_file.c_str(),
+            mtldir.c_str()
+        );
+        if (!res) throw std::exception("Could not read Mesh from .obj file.");
+  
+        size_t size_vertex_index_lists = 0;
         for (auto& shape : shapes) {
-            size_t index_offset = 0;
-
-            for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++) {
-                unsigned char num_face_verts = shape.mesh.num_face_vertices[f];
-
-                if (shape.mesh.material_ids[f] != m) {
-                    index_offset += num_face_verts;
-                    continue;
-                }
-
-                Vec3 vertices_face[3];
-                Vec2 texcoords_face[3];
-
-                for (unsigned char v = 0; v < num_face_verts; v++) {
-                    tinyobj::index_t index = shape.mesh.indices[index_offset + v];
-
-                    tinyobj::real_t vx = attribs.vertices[(size_t)(index.vertex_index) * 3 + 0];
-                    tinyobj::real_t vy = attribs.vertices[(size_t)(index.vertex_index) * 3 + 1];
-                    tinyobj::real_t vz = attribs.vertices[(size_t)(index.vertex_index) * 3 + 2];
-
-                    tinyobj::real_t tx = 0, ty = 0;
-                    if (!attribs.texcoords.empty()) {
-                        tx = attribs.texcoords[(size_t)(index.texcoord_index) * 2 + 0];
-                        ty = attribs.texcoords[(size_t)(index.texcoord_index) * 2 + 1];
-                    }
-
-                    vertices_face[v] = Vec3(vx, vy, vz);
-                    texcoords_face[v] = Vec2(tx, ty);
-                }
-
-                Vec3 tangent, binormal;
-
-                this->computeTangents(
-                    vertices_face[0], vertices_face[1], vertices_face[2],
-                    texcoords_face[0], texcoords_face[1], texcoords_face[2],
-                    tangent, binormal
-                );
-
-                for (unsigned char v = 0; v < num_face_verts; v++) {
-                    tinyobj::index_t index = shape.mesh.indices[index_offset + v];
-
-                    tinyobj::real_t vx = attribs.vertices[(size_t)(index.vertex_index) * 3 + 0];
-                    tinyobj::real_t vy = attribs.vertices[(size_t)(index.vertex_index) * 3 + 1];
-                    tinyobj::real_t vz = attribs.vertices[(size_t)(index.vertex_index) * 3 + 2];
-
-                    tinyobj::real_t tx = 0, ty = 0;
-                    if (!attribs.texcoords.empty()) {
-                        tx = attribs.texcoords[(size_t)(index.texcoord_index) * 2 + 0];
-                        ty = attribs.texcoords[(size_t)(index.texcoord_index) * 2 + 1];
-                    }
-
-                    tinyobj::real_t nx = 0, ny = 0, nz = 0;
-                    if (!attribs.normals.empty()) {
-                        nx = attribs.normals[(size_t)(index.normal_index) * 3 + 0];
-                        ny = attribs.normals[(size_t)(index.normal_index) * 3 + 1];
-                        nz = attribs.normals[(size_t)(index.normal_index) * 3 + 2];
-                    }
-
-                    Vec3 v_tangent, v_binormal;
-                    v_binormal = Vec3::cross(Vec3(nx, ny, nz), tangent);
-                    v_tangent = Vec3::cross(v_binormal, Vec3(nx, ny, nz));
-
-                    VertexMesh vertex(
-                        Vec3(vx, vy, vz),  // position
-                        Vec2(tx, ty),      // texcoord
-                        Vec3(nx, ny, nz),  // normal
-                        v_tangent,
-                        v_binormal
-                    );
-
-                    list_vertices.push_back(vertex);
-                    list_indices.push_back((unsigned int)index_global_offset + v);
-                }
-
-                index_offset += num_face_verts;
-                index_global_offset += num_face_verts;
-            }
+            size_vertex_index_lists += shape.mesh.indices.size();
         }
 
-        mMaterialSlots[m].NumIndices = index_global_offset - mMaterialSlots[m].StartIndex;
+        list_vertices.reserve(size_vertex_index_lists);
+        list_indices.reserve(size_vertex_index_lists);
+        mMaterialSlots.resize(materials.size());
 
+        size_t index_global_offset = 0;
+
+        // Store the data from the '.obj' file
+        for (size_t m = 0; m < materials.size(); m++) {
+            mMaterialSlots[m].StartIndex = index_global_offset;
+            mMaterialSlots[m].MaterialId = m;
+
+            for (auto& shape : shapes) {
+                size_t index_offset = 0;
+
+                for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++) {
+                    unsigned char num_face_verts = shape.mesh.num_face_vertices[f];
+
+                    if (shape.mesh.material_ids[f] != m) {
+                        index_offset += num_face_verts;
+                        continue;
+                    }
+
+                    Vec3 vertices_face[3];
+                    Vec2 texcoords_face[3];
+
+                    for (unsigned char v = 0; v < num_face_verts; v++) {
+                        tinyobj::index_t index = shape.mesh.indices[index_offset + v];
+
+                        tinyobj::real_t vx = attribs.vertices[(size_t)(index.vertex_index) * 3 + 0];
+                        tinyobj::real_t vy = attribs.vertices[(size_t)(index.vertex_index) * 3 + 1];
+                        tinyobj::real_t vz = attribs.vertices[(size_t)(index.vertex_index) * 3 + 2];
+
+                        tinyobj::real_t tx = 0, ty = 0;
+                        if (!attribs.texcoords.empty()) {
+                            tx = attribs.texcoords[(size_t)(index.texcoord_index) * 2 + 0];
+                            ty = attribs.texcoords[(size_t)(index.texcoord_index) * 2 + 1];
+                        }
+
+                        vertices_face[v] = Vec3(vx, vy, vz);
+                        texcoords_face[v] = Vec2(tx, ty);
+                    }
+
+                    Vec3 tangent, binormal;
+
+                    this->computeTangents(
+                        vertices_face[0], vertices_face[1], vertices_face[2],
+                        texcoords_face[0], texcoords_face[1], texcoords_face[2],
+                        tangent, binormal
+                    );
+
+                    for (unsigned char v = 0; v < num_face_verts; v++) {
+                        tinyobj::index_t index = shape.mesh.indices[index_offset + v];
+
+                        tinyobj::real_t vx = attribs.vertices[(size_t)(index.vertex_index) * 3 + 0];
+                        tinyobj::real_t vy = attribs.vertices[(size_t)(index.vertex_index) * 3 + 1];
+                        tinyobj::real_t vz = attribs.vertices[(size_t)(index.vertex_index) * 3 + 2];
+
+                        tinyobj::real_t tx = 0, ty = 0;
+                        if (!attribs.texcoords.empty()) {
+                            tx = attribs.texcoords[(size_t)(index.texcoord_index) * 2 + 0];
+                            ty = attribs.texcoords[(size_t)(index.texcoord_index) * 2 + 1];
+                        }
+
+                        tinyobj::real_t nx = 0, ny = 0, nz = 0;
+                        if (!attribs.normals.empty()) {
+                            nx = attribs.normals[(size_t)(index.normal_index) * 3 + 0];
+                            ny = attribs.normals[(size_t)(index.normal_index) * 3 + 1];
+                            nz = attribs.normals[(size_t)(index.normal_index) * 3 + 2];
+                        }
+
+                        Vec3 v_tangent, v_binormal;
+                        v_binormal = Vec3::cross(Vec3(nx, ny, nz), tangent);
+                        v_tangent = Vec3::cross(v_binormal, Vec3(nx, ny, nz));
+
+                        VertexMesh vertex(
+                            Vec3(vx, vy, vz),  // position
+                            Vec2(tx, ty),      // texcoord
+                            Vec3(nx, ny, nz),  // normal
+                            v_tangent,
+                            v_binormal
+                        );
+
+                        list_vertices.push_back(vertex);
+                        list_indices.push_back((unsigned int)index_global_offset + v);
+                    }
+
+                    index_offset += num_face_verts;
+                    index_global_offset += num_face_verts;
+                }
+            }
+
+            mMaterialSlots[m].NumIndices = index_global_offset - mMaterialSlots[m].StartIndex;
+
+        }
     }
+
+#if _DEBUG
+    if (!err.empty()) {
+        std::cout << "MESH ERR: " << err << std::endl;
+        throw std::exception("Could not read Mesh from file.");
+    }
+    if (!warn.empty()) std::cout << "MESH WARN:" << warn << std::endl;
+#endif
 
     void* shader_byte_code = nullptr;
     size_t size_shader = 0;
-
     // Retrieve the shader byte code of the 'VertexMeshLayoutShader.hlsl' compiled in GraphicsEngine constructor
     GraphicsEngine::get()->getVertexMeshLayoutShaderByteCodeAndSize(
         &shader_byte_code, &size_shader
