@@ -46,25 +46,25 @@ void PostProcessingDemo::onCreate()
 
 	// Sky mesh
 	mSkyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
-	mSkyTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
 	mSkyMat = GraphicsEngine::get()->createMaterial(L"SkyBoxVS.hlsl", L"SkyBoxPS.hlsl");
-	mSkyMat->addTexture(mSkyTex);
+	mSkyMat->addTexture(GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg"));
 	mSkyMat->setCullMode(CULL_MODE::CULL_MODE_FRONT);
 
 	// Player mesh
-	mPlayerMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\player.gltf");
-	mPlayerTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\sand.jpg");
-	mPlayerMat = GraphicsEngine::get()->createMaterial(mBaseMat);
-	mPlayerMat->addTexture(mPlayerTex);
-	mPlayerMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
+	//mpm1 = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\BoomBox.obj");
+	mpm1 = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\gltfTest\\BoomBox.gltf");
+	mpmat1 = GraphicsEngine::get()->createMaterial(mBaseMat);
+	mpmat1->addTexture(GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Meshes\\gltfTest\\BoomBox_baseColor.png"));
+	mpmat1->addTexture(GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Meshes\\gltfTest\\BoomBox_occlusionRoughnessMetallic.png"));
+	mpmat1->addTexture(GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Meshes\\gltfTest\\BoomBox_normal.png"));
+	mpmat1->addTexture(GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Meshes\\gltfTest\\BoomBox_emissive.png"));
+	mpmat1->setCullMode(CULL_MODE::CULL_MODE_FRONT);
 
 	// BumpMapping test
 	mSphereMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
-	mSphereTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_d.jpg");
-	mSphereNTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_n.jpg");
 	mSphereMat = GraphicsEngine::get()->createMaterial(L"BumpMappingVS.hlsl", L"BumpMappingPS.hlsl");
-	mSphereMat->addTexture(mSphereTex);
-	mSphereMat->addTexture(mSphereNTex);
+	mSphereMat->addTexture(GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_d.jpg"));
+	mSphereMat->addTexture(GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick_n.jpg"));
 	mSphereMat->setCullMode(CULL_MODE::CULL_MODE_BACK);
 
 	// Base material - to hold the directional light property for most meshes
@@ -161,9 +161,9 @@ void PostProcessingDemo::onUpdate()
 
 	// Render player mesh
 	m_list_materials.clear();
-	m_list_materials.push_back(mPlayerMat);
-	this->drawMesh(mPlayerMesh, m_list_materials);
-	this->updateModel(Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(1, 1, 1), m_list_materials);
+	m_list_materials.push_back(mpmat1);
+	this->drawMesh(mpm1, m_list_materials);
+	this->updateModel(Vec3(0, 0, 2), Vec3(0, 0, 0), Vec3(111, 111, 111), m_list_materials);
 
 	// Normal Mapping Render technique test
 	m_list_materials.clear();
@@ -387,7 +387,7 @@ void PostProcessingDemo::updateThirdPersonCamera()
 		m_cam_position +
 		world_cam.getZDirection() * (m_forward) * 15.0f * m_delta_time +
 		world_cam.getXDirection() * (m_rightward) * 15.0f * m_delta_time
-		);
+	);
 
 	// Used to set the camera behind the player and up a bit
 	//Vec3 new_pos = m_cam_position + world_cam.getZDirection() * (-m_current_cam_distance);

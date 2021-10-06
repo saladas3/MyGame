@@ -72,18 +72,13 @@ private:
     MaterialPtr mBaseMat = nullptr;
 
     MeshPtr mSkyMesh = nullptr;
-    TexturePtr mSkyTex = nullptr;
     MaterialPtr mSkyMat = nullptr;
 
-    MeshPtr mPlayerMesh = nullptr;
-    TexturePtr mPlayerTex = nullptr;
-    MaterialPtr mPlayerMat = nullptr;
+    MeshPtr mpm1 = nullptr;
+    MaterialPtr mpmat1 = nullptr;
 
     MeshPtr mSphereMesh = nullptr;
-    TexturePtr mSphereTex = nullptr;
-    TexturePtr mSphereNTex = nullptr;
     MaterialPtr mSphereMat = nullptr;
-
 
     /* --------------------------------------------------- */
 

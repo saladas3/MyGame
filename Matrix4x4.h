@@ -26,11 +26,24 @@ public:
         mMatrix[3][2] = translation.m_z;
     }
 
+    Vec3 getTranslation() {
+        return Vec3(mMatrix[3][0], mMatrix[3][1], mMatrix[3][2]);
+    }
+
     void setScale(const Vec3& scale)
     {
         mMatrix[0][0] = scale.m_x;
         mMatrix[1][1] = scale.m_y;
         mMatrix[2][2] = scale.m_z;
+    }
+
+    Vec3 getScale()
+    {
+        return Vec3(
+            mMatrix[0][0],
+            mMatrix[1][1],
+            mMatrix[2][2]
+        );
     }
 
     void setRotationX(float x)
@@ -116,6 +129,16 @@ public:
         setMatrix(out);
     }
 
+    void operator*=(const float x) {
+        Matrix4x4 out;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                out.mMatrix[i][j] = mMatrix[i][j] * x;
+            }
+        }
+        setMatrix(out);
+    }
+
     void setMatrix(const Matrix4x4& matrix) {
         ::memcpy(mMatrix, matrix.mMatrix, sizeof(float) * 16);
     }
@@ -124,16 +147,30 @@ public:
         return Vec3(mMatrix[2][0], mMatrix[2][1], mMatrix[2][2]);
     }
 
+    void setZDirection(const Vec3& dir) {
+        mMatrix[2][0] = dir.m_x;
+        mMatrix[2][1] = dir.m_y;
+        mMatrix[2][2] = dir.m_z;
+    }
+
     Vec3 getYDirection() {
         return Vec3(mMatrix[1][0], mMatrix[1][1], mMatrix[1][2]);
+    }
+
+    void setYDirection(const Vec3& dir) {
+        mMatrix[1][0] = dir.m_x;
+        mMatrix[1][1] = dir.m_y;
+        mMatrix[1][2] = dir.m_z;
     }
 
     Vec3 getXDirection() {
         return Vec3(mMatrix[0][0], mMatrix[0][1], mMatrix[0][2]);
     }
 
-    Vec3 getTranslation() {
-        return Vec3(mMatrix[3][0], mMatrix[3][1], mMatrix[3][2]);
+    void setXDirection(const Vec3& dir) {
+        mMatrix[0][0] = dir.m_x;
+        mMatrix[0][1] = dir.m_y;
+        mMatrix[0][2] = dir.m_z;
     }
 
     /// <summary>
@@ -164,7 +201,7 @@ public:
         mMatrix[3][2] = -(near_plane / (far_plane - near_plane));
     }
 
-private:
+//private:
     float mMatrix[4][4] = {};
 
 };

@@ -1,6 +1,15 @@
 Texture2D Color: register(t0);
 sampler ColorSampler: register(s0);
 
+Texture2D Occlusion: register(t1);
+sampler OcclusionSampler: register(s1);
+
+Texture2D Normal: register(t2);
+sampler NormalSampler: register(s2);
+
+Texture2D Emissive: register(t3);
+sampler EmissiveSampler: register(s3);
+
 struct PS_INPUT
 {
 	float4 position: SV_POSITION;
@@ -24,7 +33,12 @@ cbuffer constant: register(b0)
 
 float4 psmain(PS_INPUT input) : SV_TARGET
 {
-	float4 color = Color.Sample(ColorSampler, float2(input.texcoord.x, 1.0 - input.texcoord.y));
+	float4 color = Color.Sample(ColorSampler, float2(input.texcoord.x, input.texcoord.y));
+	float4 occlusion = Occlusion.Sample(OcclusionSampler, float2(input.texcoord.x, input.texcoord.y));
+	float4 normal = Normal.Sample(NormalSampler, float2(input.texcoord.x, input.texcoord.y));
+	float4 emissive = Emissive.Sample(EmissiveSampler, float2(input.texcoord.x, input.texcoord.y));
+
+	color = color + emissive;
 
 	// Ambient light
 	float ka = 8.5;

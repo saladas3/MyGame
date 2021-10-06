@@ -10,6 +10,8 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <initializer_list>
 
 // For DEBUG
 #include <iostream>

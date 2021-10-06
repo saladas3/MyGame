@@ -16,6 +16,24 @@ float ucharToFloat(UCHAR a, UCHAR b, UCHAR c, UCHAR d) {
     return f;
 }
 
+unsigned short int ucharToUint(UCHAR a, UCHAR b) {
+    unsigned short int f;
+    UCHAR c_arr[] = { a, b };
+    memcpy(&f, &c_arr, sizeof(f));
+    return f;
+}
+
+UINT maxOfThree(UINT a, UINT b, UINT c) {
+    UINT max = a;
+
+    if (max < b)
+        max = b;
+    if (max < c)
+        max = c;
+
+    return max;
+}
+
 Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
 {
     tinyobj::attrib_t attribs;
@@ -43,75 +61,135 @@ Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
         }
         if (!res) throw std::exception("Could not read Mesh from gltf file.");
 
-        UINT pos_index = 0, normal_index = 0, index_global_offset = 0;
+        std::vector<Vec3> posVec, normalVec;
+        std::vector<Vec2> texVec;
+        size_t index_global_offset = 0, mat_id = 0;
+        // Parse meshes
         for (size_t i = 0; i < model.meshes.size(); i++) {
+
             for (size_t j = 0; j < model.meshes[i].primitives.size(); j++) {
                 tinygltf::Primitive primitive = model.meshes[i].primitives[j];
-                int pos_index = primitive.attributes["POSITION"];
-                int normal_index = primitive.attributes["NORMAL"];
-                
-                tinygltf::Accessor pos_accessor = model.accessors[pos_index];
-                tinygltf::Accessor normal_accessor = model.accessors[normal_index];
 
-                tinygltf::BufferView buffer_view_pos = model.bufferViews[pos_accessor.bufferView];
-                tinygltf::BufferView buffer_view_normal = model.bufferViews[normal_accessor.bufferView];
-                for (size_t k = 0; k < buffer_view_pos.byteLength; k+=12) {
-                    float vx = ucharToFloat(
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k],
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 1],
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 2],
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 3]
-                    );
-                    float vy = ucharToFloat(
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 4],
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 5],
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 6],
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 7]
-                    );
-                    float vz = ucharToFloat(
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 8],
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 9],
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 10],
-                        model.buffers[buffer_view_pos.buffer].data[buffer_view_pos.byteOffset + k + 11]
-                    );
+                for (auto& attrib : primitive.attributes) {
+                    tinygltf::Accessor acc = model.accessors[attrib.second];
+                    tinygltf::BufferView bfv = model.bufferViews[acc.bufferView];
+                    tinygltf::Buffer buffer = model.buffers[bfv.buffer];
 
-                    float nx = ucharToFloat(
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k],
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 1],
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 2],
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 3]
-                    );
-                    float ny = ucharToFloat(
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 4],
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 5],
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 6],
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 7]
-                    );
-                    float nz = ucharToFloat(
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 8],
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 9],
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 10],
-                        model.buffers[buffer_view_normal.buffer].data[buffer_view_normal.byteOffset + k + 11]
-                    );
-
-                    VertexMesh vertex(
-                        Vec3(vx, vy, vz),  // position
-                        Vec2(),      // texcoord
-                        Vec3(nx, ny, nz),  // normal
-                        Vec3(),
-                        Vec3()
-                    );
-
-                    list_vertices.push_back(vertex);
-                    list_indices.push_back(++index_global_offset);
+                    UINT jmp = 1;
+                    if (acc.type == 2)
+                        jmp = 8;
+                    if (acc.type == 3)
+                        jmp = 12;
+                    
+                    for (size_t k = bfv.byteOffset; k < bfv.byteOffset + bfv.byteLength; k+=jmp) {
+                        if (attrib.first == "TEXCOORD_0") {
+                            texVec.push_back(
+                                Vec2(
+                                    ucharToFloat(
+                                        buffer.data[k],
+                                        buffer.data[k + 1],
+                                        buffer.data[k + 2],
+                                        buffer.data[k + 3]
+                                    ),
+                                    ucharToFloat(
+                                        buffer.data[k + 4],
+                                        buffer.data[k + 5],
+                                        buffer.data[k + 6],
+                                        buffer.data[k + 7]
+                                    )
+                                )
+                            );
+                        }
+                        if (attrib.first == "POSITION") {
+                            posVec.push_back(
+                                Vec3(
+                                    -ucharToFloat(
+                                        buffer.data[k],
+                                        buffer.data[k + 1],
+                                        buffer.data[k + 2],
+                                        buffer.data[k + 3]
+                                    ),
+                                    ucharToFloat(
+                                        buffer.data[k + 4],
+                                        buffer.data[k + 5],
+                                        buffer.data[k + 6],
+                                        buffer.data[k + 7]
+                                    ),
+                                    ucharToFloat(
+                                        buffer.data[k + 8],
+                                        buffer.data[k + 9],
+                                        buffer.data[k + 10],
+                                        buffer.data[k + 11]
+                                    )
+                                )
+                            );
+                        }
+                        if (attrib.first == "NORMAL") {
+                            normalVec.push_back(
+                                Vec3(
+                                    ucharToFloat(
+                                        buffer.data[k],
+                                        buffer.data[k + 1],
+                                        buffer.data[k + 2],
+                                        buffer.data[k + 3]
+                                    ),
+                                    ucharToFloat(
+                                        buffer.data[k + 4],
+                                        buffer.data[k + 5],
+                                        buffer.data[k + 6],
+                                        buffer.data[k + 7]
+                                    ),
+                                    ucharToFloat(
+                                        buffer.data[k + 8],
+                                        buffer.data[k + 9],
+                                        buffer.data[k + 10],
+                                        buffer.data[k + 11]
+                                    )
+                                )
+                            );
+                        }
+                    }
                 }
+
+                tinygltf::BufferView bvi = model.bufferViews[model.accessors[primitive.indices].bufferView];
+                for (size_t k = bvi.byteOffset; k < bvi.byteLength + bvi.byteOffset; k += 2) {
+                    list_indices.push_back(
+                        ucharToUint(
+                            model.buffers[bvi.buffer].data[k],
+                            model.buffers[bvi.buffer].data[k + 1]
+                        )
+                    );
+                }
+
+                MaterialSlot mat_slot;
+                mat_slot.StartIndex = index_global_offset;
+                mat_slot.MaterialId = mat_id;
+                mat_slot.NumIndices = list_indices.size();
+                mMaterialSlots.push_back(mat_slot);
+
+                index_global_offset += list_indices.size();
             }
+            mat_id++;
         }
-        MaterialSlot x;
-        x.StartIndex = 0;
-        x.MaterialId = 0;
-        x.NumIndices = 366;
-        mMaterialSlots.push_back(x);
+
+        // Save in the list_vertices
+        size_t max_v = maxOfThree(posVec.size(), normalVec.size(), texVec.size());
+        for (size_t i = 0; i < max_v; i++) {
+            Vec3 pos;
+            Vec3 normal;
+            Vec2 tex;
+            if (i < posVec.size()) {
+                pos = posVec[i];
+            }
+            if (i < normalVec.size()) {
+                normal = normalVec[i];
+            }
+            if (i < texVec.size()) {
+                tex = texVec[i];
+            }
+            VertexMesh v_mesh(pos, tex, normal, Vec3(), Vec3());
+            list_vertices.push_back(v_mesh);
+        }
     }
     else if (filesystem_path.extension() == ".obj") {
         std::string mtldir = input_file.substr(0, input_file.find_last_of("\\/"));
@@ -242,6 +320,7 @@ Mesh::Mesh(const wchar_t* full_path) : Resource(full_path)
     GraphicsEngine::get()->getVertexMeshLayoutShaderByteCodeAndSize(
         &shader_byte_code, &size_shader
     );
+    // Create vertex and index buffer for the created mesh
     mVertexBuffer = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(
         &list_vertices[0],
         sizeof(VertexMesh),
